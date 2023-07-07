@@ -1,0 +1,29 @@
+.cric-dashboard {
+  .cric-header {
+    // padding-bottom: 20px;
+    padding: 10px;
+  }
+
+  .team-name-highlight {
+    font-size: 20px;
+    font-family: cursive;
+  }
+
+  .secondary-title {
+    color: #d9ebde;
+  }
+
+  .secondary-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+    .MuiListItemText-root {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: flex-end;
+      padding-right: 10px;
+    }
+  }
+}

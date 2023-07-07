@@ -1,0 +1,9 @@
+.batsmen-card-wrapper {
+  .MuiGrid-item {
+    text-align: left;
+  }
+
+  .MuiCardContent-root:last-child {
+    padding-bottom: 0;
+  }
+}

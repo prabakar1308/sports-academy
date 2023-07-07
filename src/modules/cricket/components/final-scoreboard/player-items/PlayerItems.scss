@@ -1,0 +1,21 @@
+.scoreboard-player-items {
+  .MuiListItem-root {
+    padding-left: 5px;
+    padding-right: 12px;
+  }
+  .MuiListItemText-root {
+    padding-left: 0;
+    padding-right: 0;
+    .MuiTypography-root {
+      font-size: 12px;
+    }
+  }
+
+  .total-section {
+    .MuiTypography-root {
+      font-size: 12px;
+      font-weight: 600;
+      text-align: end;
+    }
+  }
+}

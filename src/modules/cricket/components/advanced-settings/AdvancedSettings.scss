@@ -1,0 +1,30 @@
+.cricket-adv-settings {
+  .MuiTypography-subtitle2 {
+    padding-top: 10px;
+  }
+
+  .MuiSlider-root {
+    width: 50%;
+    padding-top: 0px;
+    margin-bottom: 20px;
+  }
+
+  .MuiFormGroup-root {
+    padding-top: 15px;
+  }
+
+  .MuiFormGroup-root {
+    padding-bottom: 20px;
+  }
+
+  .MuiSlider-markLabel {
+    top: 22px;
+    font-family: fantasy;
+  }
+
+  @media only screen and (min-width: 768px) {
+    .MuiSlider-root {
+      width: 30%;
+    }
+  }
+}

@@ -1,0 +1,15 @@
+.final-scoreboard-wrapper {
+  .team-header {
+    .MuiAccordionSummary-content {
+      > div {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+}
