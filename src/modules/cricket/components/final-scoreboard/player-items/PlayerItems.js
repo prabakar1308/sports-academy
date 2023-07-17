@@ -2,6 +2,7 @@ import * as React from "react";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
+import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import { useSelector } from "react-redux";
 
@@ -57,6 +58,11 @@ export default function PlayerItems({ isFirstInnings }) {
           return `c  & b ${bowler.name}`;
         }
         return `c ${wicketHelpedBy.name} b ${bowler.name}`;
+      } else if (
+        wicketType.value === WICKET_TYPES.RUNOUT ||
+        wicketType.value === WICKET_TYPES.RUNOUT_OTHER
+      ) {
+        return `runout (${wicketHelpedBy.name})`;
       }
     } else if (isBatting) {
       return "batting";
@@ -88,7 +94,11 @@ export default function PlayerItems({ isFirstInnings }) {
 
   const getListItem = (player, isBatting, index) => {
     return player ? (
-      <ListItem divider key={index}>
+      <ListItem
+        divider
+        key={index}
+        sx={{ backgroundColor: isBatting ? "#d6f4e5" : "white" }}
+      >
         <Grid container spacing={1}>
           <Grid item xs={7}>
             <ListItemText
@@ -176,6 +186,19 @@ export default function PlayerItems({ isFirstInnings }) {
     return getListItem(player, true, index);
   };
 
+  const getUpcomingBatsmens = (players) => {
+    let data = "";
+    [...players]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .filter((p) => p.isOut === null)
+      .forEach((p) =>
+        data
+          ? (data = `${data}, ${p.name}`)
+          : (data = `Yet To Bat--> ${p.name}`)
+      );
+    return data;
+  };
+
   return (
     <List
       className="scoreboard-player-items"
@@ -183,18 +206,27 @@ export default function PlayerItems({ isFirstInnings }) {
     >
       {getListItemHeader(batsmenHeaders)}
       {players.map((player, index) => {
-        return player.isOut ? getListItem(player, false, index) : <></>;
+        if (player.isOut) return getListItem(player, false, index);
+        else if (player.isOut === false)
+          return getCurrentBatsmen(player, index);
+        else <></>;
       })}
       {/* current batting players */}
-      {players.map((player, index) => {
+      {/* {players.map((player, index) => {
         return player.isOut === false ? (
           getCurrentBatsmen(player, index)
         ) : (
           <></>
         );
-      })}
+      })} */}
       {/* {getListItem(batsmen1, true)}
       {getListItem(batsmen2, true)} */}
+      <Typography
+        variant="caption"
+        sx={{ textAlign: "left", padding: "10px 5px", display: "flex" }}
+      >
+        {getUpcomingBatsmens([...players])}
+      </Typography>
       {getListItemHeader(bowlerHeaders)}
       {bowlers.map((bowler, index) => {
         const bow =

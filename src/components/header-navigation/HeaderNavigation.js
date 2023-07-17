@@ -18,6 +18,7 @@ import { Link } from "react-router-dom";
 import "./HeaderNavigation.scss";
 
 const pages = [
+  { title: "Dashboard", link: "/" },
   { title: "Cricket", link: "/cricket" },
   { title: "Shuttle", link: "/shuttle" },
   { title: "Booking", link: "/booking" },

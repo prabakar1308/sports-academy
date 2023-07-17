@@ -14,6 +14,7 @@ import { Timestamp } from "firebase/firestore/lite";
 import { v4 as uuid } from "uuid";
 
 import "./PlayerDialog.scss";
+import { getNewPlayerDetails } from "../../utils";
 
 export default function PlayerDialog(props) {
   const { onClose, team, open, title, players, currentBowler = null } = props;
@@ -29,41 +30,16 @@ export default function PlayerDialog(props) {
     setIsCreate(false);
     onClose({
       isNew: true,
-      value: {
-        id: uuid(),
-        name: playerName,
-        teamId: team.id,
-        isActive: true,
-        created: Timestamp.now(),
-        matches: 0,
-        runs: 0,
-        balls: 0,
-        average: 0,
-        highestScore: 0,
-        fours: 0,
-        sixes: 0,
-        catches: 0,
-        wickets: 0,
-        bestBowlingWickets: 0,
-        bestBowlingRuns: 0,
-        bowlingAverage: 0,
-        bowlingRuns: 0,
-        bowlingBalls: 0,
-        strikeRate: 0,
-        innings: 0,
-        outs: 0,
-        notOuts: 0,
-        overs: 0,
-        maidens: 0,
-        econRate: 0,
-      },
+      value: getNewPlayerDetails(playerName, team.id),
     });
     setPlayerName("");
   };
 
   return (
     <Dialog onClose={() => handleClose(null)} open={open}>
-      <DialogTitle>{title}</DialogTitle>
+      <DialogTitle>
+        {title} ({team?.name})
+      </DialogTitle>
 
       <div className="player-dialog-wrapper">
         <Box
@@ -78,17 +54,20 @@ export default function PlayerDialog(props) {
           }}
         >
           {/* <div className="player-dialog-wrapper"> */}
-          {players.map((player, index) => {
-            return currentBowler && currentBowler.id === player.id ? null : (
-              <Paper
-                key={index}
-                elevation={3}
-                onClick={() => handleClose(player)}
-              >
-                <div className="add-player">{player.name}</div>
-              </Paper>
-            );
-          })}
+
+          {[...players]
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((player, index) => {
+              return currentBowler && currentBowler.id === player.id ? null : (
+                <Paper
+                  key={index}
+                  elevation={3}
+                  onClick={() => handleClose(player)}
+                >
+                  <div className="add-player">{player.name}</div>
+                </Paper>
+              );
+            })}
           <Paper
             elevation={3}
             classes={{

@@ -23,6 +23,7 @@ import {
 } from "firebase/firestore/lite";
 import * as cricketActions from "../../../../store/actions/cricket";
 import PlayerDialog from "../player-dialog/PlayerDialog";
+import { setPlayerForCurrentMatch } from "../../utils";
 
 import "./AdvancedSettings.scss";
 
@@ -75,18 +76,39 @@ const AdvancedSettings = () => {
   const handleClose = ({ isNew, value }) => {
     if (isNew) {
       createPlayer(value);
+      const values = {
+        striker,
+        nonStriker,
+        openingBowler: bowler,
+        wideAllowed: wide,
+        noBallAllowed: noBall,
+        byesAllowed: byes,
+        playersPerTeam: playersCount,
+      };
+      const players =
+        playerType === "openingBowler" ? [...team2Players] : [...team1Players];
+      const teamPlayerKey =
+        playerType === "openingBowler" ? "team2Players" : "team1Players";
+
       dispatch(
-        cricketActions.addCricketPlayer({
-          key: playerType === "bowler" ? "team2Players" : "team1Players",
-          value,
+        cricketActions.updateMatchDetails({
+          ...values,
+          [playerType]: value,
+          [teamPlayerKey]: [...players, value],
         })
       );
+      // dispatch(
+      //   cricketActions.addCricketPlayer({
+      //     key: playerType === "openingBowler" ? "team2Players" : "team1Players",
+      //     value,
+      //   })
+      // );
     } else if (value) {
       if (playerType === "striker") {
         setStriker(value);
-      } else if (playerType === "non-striker") {
+      } else if (playerType === "nonStriker") {
         setNonStriker(value);
-      } else if (playerType === "bowler") {
+      } else if (playerType === "openingBowler") {
         setBowler(value);
       }
     }
@@ -116,6 +138,7 @@ const AdvancedSettings = () => {
         openingBowler: bowler,
         wideAllowed: wide,
         noBallAllowed: noBall,
+        byesAllowed: byes,
         playersPerTeam: playersCount,
       })
     );
@@ -128,7 +151,8 @@ const AdvancedSettings = () => {
         firstInnings: {
           team: isFirstTeam() ? team1 : team2,
           players: players1.map((player) => ({
-            ...player,
+            // update to maintain only current match data
+            ...setPlayerForCurrentMatch(player),
             // [INFO]: isOut: null --> yet to bat & isOut: false ---> current batsmens
             isOut:
               striker.id === player.id || nonStriker.id === player.id
@@ -136,9 +160,12 @@ const AdvancedSettings = () => {
                 : null,
             isRetire: false,
           })),
-          batsmen1: { ...striker, isStriker: true },
-          batsmen2: { ...nonStriker, isStriker: false },
-          currentBowler: bowler,
+          batsmen1: { ...setPlayerForCurrentMatch(striker), isStriker: true },
+          batsmen2: {
+            ...setPlayerForCurrentMatch(nonStriker),
+            isStriker: false,
+          },
+          currentBowler: setPlayerForCurrentMatch(bowler),
           currentOver: 0,
           bowlers: [],
           balls: [],
@@ -155,7 +182,8 @@ const AdvancedSettings = () => {
         secondInnings: {
           team: isFirstTeam() ? team2 : team1,
           players: players2.map((player) => ({
-            ...player,
+            // update to maintain only current match data
+            ...setPlayerForCurrentMatch(player),
             isOut: null,
             isRetire: false,
           })),
@@ -183,7 +211,7 @@ const AdvancedSettings = () => {
   };
 
   const isFirstTeam = () => {
-    if (playerType === "bowler") {
+    if (playerType === "openingBowler") {
       return battingFirst && battingFirst.id === team2.id;
     }
     return battingFirst && battingFirst.id === team1.id;
@@ -242,15 +270,14 @@ const AdvancedSettings = () => {
           <Chip
             onClick={() => handleClickOpen("striker")}
             label={striker ? striker.name : "Select Striker"}
-            onDelete={handleDelete}
+            // onDelete={handleDelete}
           />
           <Typography variant="subtitle2" gutterBottom>
             Non-Striker
           </Typography>
           <Chip
-            onClick={() => handleClickOpen("non-striker")}
+            onClick={() => handleClickOpen("nonStriker")}
             label={nonStriker ? nonStriker.name : "Select Non Striker"}
-            onDelete={handleDelete}
           />
           {/* </div> */}
 
@@ -263,9 +290,9 @@ const AdvancedSettings = () => {
             Opening Bowler
           </Typography>
           <Chip
-            onClick={() => handleClickOpen("bowler")}
+            onClick={() => handleClickOpen("openingBowler")}
             label={bowler ? bowler.name : "Select Bowler"}
-            onDelete={handleDelete}
+            // onDelete={handleDelete}
           />
           <FormGroup row>
             <FormControlLabel
@@ -344,7 +371,7 @@ const AdvancedSettings = () => {
 
 const createPlayer = async (player) => {
   try {
-    await addDoc(collection(db, "Players"), player);
+    await setDoc(doc(db, "players", player.id), player);
   } catch (err) {
     alert(err);
   }

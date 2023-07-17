@@ -31,7 +31,7 @@ export default function Scoreboard() {
 
   React.useEffect(() => {
     if (!isMatchStarted) {
-      navigate("/cricket/new-match");
+      navigate("/cricket");
     } else if (isMatchCompleted) {
       navigate("/cricket/finalscore");
     }

@@ -1,6 +1,7 @@
 import * as React from "react";
 import ToggleButtons from "../../components/toggleButton/ToggleButton";
 import { useNavigate } from "react-router-dom";
+import Typography from "@mui/material/Typography";
 
 const cardList = [
   {
@@ -32,8 +33,7 @@ const Dashboard = () => {
         padding: "50px",
       }}
     >
-      Select Client:
-      <br />
+      <Typography variant="button">Select Client:</Typography>
       <br />
       <ToggleButtons
         id="client-ids"

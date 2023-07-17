@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation, Outlet, useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -9,21 +9,24 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ScoreboardIcon from "@mui/icons-material/Scoreboard";
 import AvatarIcon from "../../components/avatar-icon/AvatarIcon";
-import { setDoc, doc, Timestamp } from "firebase/firestore/lite";
+import { setDoc, deleteDoc, doc, Timestamp } from "firebase/firestore/lite";
 
 import CardComponent from "../../components/card/Card";
 
 import { db } from "../../database/firebase.db";
 import { getRequiredRunDetails } from "./utils";
 import "./cricket.scss";
+import * as cricketActions from "../../store/actions/cricket";
+import { updatePlayersFirebase } from "./db-operations";
 
 const Cricket = () => {
   const location = useLocation();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const {
     matchDetails,
-    matchDetails: { overs },
+    matchDetails: { overs, team1Players, team2Players },
     scoreboardEntries,
     scoreboard,
     scoreboard: {
@@ -36,13 +39,15 @@ const Cricket = () => {
     },
   } = useSelector((state) => state.cricket);
 
-  const { totalRuns, team, totalBalls } = firstInnings;
+  const { totalRuns, team, totalBalls, players: players1 } = firstInnings;
   const {
     totalRuns: totalRuns2,
     totalBalls: totalBalls2,
     wickets,
     balls,
     team: team2,
+    players: players2,
+    currentBowler,
   } = secondInnings;
 
   const { runsRequired, rrr, remainingBalls } = getRequiredRunDetails({
@@ -51,6 +56,7 @@ const Cricket = () => {
     totalRuns,
     totalRuns2,
     wickets,
+    bowlingBalls: currentBowler ? currentBowler.bowlingBalls : 0,
   });
 
   const cardList = [
@@ -59,17 +65,18 @@ const Cricket = () => {
       description: "Manages scoreboard",
       image: require("../../images/cricket.jpg"),
       link: "/cricket/new-match",
+      handleClick: () => dispatch(cricketActions.resetMatchDetails()),
     },
     {
       title: "View Matches",
       description: "View the list of matches played",
-      image: require("../../images/cricket-teams.jpg"),
+      image: require("../../images/cricket-tournament.jpg"),
       link: "/cricket/matches",
     },
     {
-      title: "Schedule Tournaments",
-      description: "Create tournaments and schedule fixtures",
-      image: require("../../images/cricket-tournament.jpg"),
+      title: "View Players",
+      description: "View player profile",
+      image: require("../../images/cricket-teams.jpg"),
       link: "/cricket/new-match",
     },
   ];
@@ -81,6 +88,11 @@ const Cricket = () => {
       return "";
     };
 
+    window.history.pushState(null, null, location.href);
+    window.onpopstate = function (event) {
+      window.history.go(1);
+    };
+
     window.addEventListener("beforeunload", unloadCallback);
     return () => window.removeEventListener("beforeunload", unloadCallback);
   }, []);
@@ -90,6 +102,12 @@ const Cricket = () => {
       // update match in db
       console.log("match updated in DB");
       updateMatch(scoreboard, matchDetails);
+
+      // update players in db
+      if (isMatchCompleted) {
+        const players = [...team1Players, ...team2Players];
+        updatePlayersFirebase(players);
+      }
     }
   }, [isFirstInnings, isMatchCompleted]);
 
@@ -149,11 +167,13 @@ const Cricket = () => {
             <ListItemText
               primary={
                 <span>
-                  <span className={isFirstInnings && "team-name-highlight"}>
+                  <span className={isFirstInnings ? "team-name-highlight" : ""}>
                     {team.name}
                   </span>{" "}
                   vs{" "}
-                  <span className={!isFirstInnings && "team-name-highlight"}>
+                  <span
+                    className={!isFirstInnings ? "team-name-highlight" : ""}
+                  >
                     {team2.name}
                   </span>
                 </span>
@@ -203,6 +223,9 @@ const Cricket = () => {
           </Grid>
         </Grid>
       )}
+      {/* <button onClick={() => updatePlayersFirebase(team1Players)}>
+        testtt
+      </button> */}
       <Outlet />
     </div>
   );

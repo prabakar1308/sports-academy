@@ -19,6 +19,8 @@ export const END_INNINGS = "[cricket] END_INNINGS";
 export const END_MATCH = "[cricket] END_MATCH";
 export const UPDATE_MATCH_LIST = "[cricket] UPDATE_MATCH_LIST";
 export const SET_MATCH_DETAILS = "[cricket] SET_MATCH_DETAILS";
+export const UPDATE_PLAYER_SCORE = "[cricket] UPDATE_PLAYER_SCORE";
+export const RESET_MATCH_DETAILS = "[cricket] RESET_MATCH_DETAILS";
 
 export const getCricketTeams = (teams) => {
   return {
@@ -147,6 +149,19 @@ export const updateMatchList = (data) => {
 export const setMatchDetails = (data) => {
   return {
     type: SET_MATCH_DETAILS,
+    payload: data,
+  };
+};
+
+export const resetMatchDetails = () => {
+  return {
+    type: RESET_MATCH_DETAILS,
+  };
+};
+
+export const updatePlayerScore = (data) => {
+  return {
+    type: UPDATE_PLAYER_SCORE,
     payload: data,
   };
 };

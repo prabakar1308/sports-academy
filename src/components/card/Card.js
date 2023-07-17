@@ -9,11 +9,15 @@ import { Link } from "react-router-dom";
 
 export default function CardComponent({ details }) {
   console.log(details);
-  const { title, description, image, link } = details;
+  const { title, description, image, link, handleClick } = details;
   // const imageUrl = require(image);
   return (
     <Card sx={{ maxWidth: 345 }}>
-      <CardActionArea component={link ? Link : null} to={link || ""}>
+      <CardActionArea
+        component={link ? Link : null}
+        to={link || ""}
+        onClick={handleClick}
+      >
         {image && (
           <CardMedia
             // style={{ height: "200px", paddingTop: "56.25%" }}

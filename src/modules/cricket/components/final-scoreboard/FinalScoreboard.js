@@ -27,7 +27,7 @@ export default function FinalScoreboard() {
 
   React.useEffect(() => {
     if (!isMatchStarted) {
-      navigate("/cricket/new-match");
+      navigate("/cricket");
     }
   }, []);
 

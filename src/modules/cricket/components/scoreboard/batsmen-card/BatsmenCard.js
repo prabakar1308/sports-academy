@@ -5,6 +5,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 import "./BatsmenCard.scss";
 
@@ -23,6 +24,7 @@ export default function BatsmenCard() {
   } = useSelector((state) => state.cricket);
 
   const innings = isFirstInnings ? firstInnings : secondInnings;
+  const [open, setOpen] = React.useState(false);
 
   const { batsmen1, batsmen2, currentBowler } = innings;
 
@@ -84,6 +86,8 @@ export default function BatsmenCard() {
               sx={{
                 minWidth: minWidths[index],
                 // fontWeight: isHeader ? 800 : 500,
+                display: "flex",
+                flexDirection: "row",
               }}
               // xs={index === 0 ? 6 : 1}
               // sm={index === 0 ? 4 : 1}
@@ -96,6 +100,18 @@ export default function BatsmenCard() {
               >
                 {itemVal}
               </Typography>
+              {/* {isHeader && index === 0 && (
+                <AddCircleOutlineIcon
+                  fontSize="small"
+                  sx={{
+                    marginTop: "-2px",
+                    cursor: "pointer",
+                    paddingLeft: "3px",
+                    color: "lightgray",
+                  }}
+                  onClick={() => console.log("sdsdsd")}
+                />
+              )} */}
             </Grid>
           ))}
       </Grid>
@@ -122,6 +138,15 @@ export default function BatsmenCard() {
           </Stack>
         </CardContent>
       </Card>
+      {/* {open && (
+        <PlayerDialog
+          team={isFirstTeam() ? team1 : team2}
+          open={open}
+          onClose={handleClose}
+          title={"Available Players"}
+          players={isFirstTeam() ? team1Players : team2Players}
+        />
+      )} */}
     </div>
   );
 }

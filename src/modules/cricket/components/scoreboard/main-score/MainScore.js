@@ -7,12 +7,25 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import ScoreboardIcon from "@mui/icons-material/Scoreboard";
 import BlockIcon from "@mui/icons-material/Block";
+import StartIcon from "@mui/icons-material/Start";
+import {
+  setDoc,
+  doc,
+  Timestamp,
+  addDoc,
+  collection,
+} from "firebase/firestore/lite";
 
+import { db } from "../../../../../database/firebase.db";
 import * as cricketActions from "../../../../../store/actions/cricket";
 import NewInningsDialog from "../new-innings-dialog/NewInningsDialog";
 import AvatarIcon from "../../../../../components/avatar-icon/AvatarIcon";
 import EndMatchDialog from "../end-match-dialog/EndMatchDialog";
-import { getRequiredRunDetails } from "../../../utils";
+import {
+  getNewPlayerDetails,
+  getRequiredRunDetails,
+  omitProps,
+} from "../../../utils";
 import "./MainScore.scss";
 
 export default function MainScore() {
@@ -27,7 +40,8 @@ export default function MainScore() {
   const [endDialog, setEndDialog] = React.useState(false);
 
   const innings = isFirstInnings ? firstInnings : secondInnings;
-  const { totalRuns, wickets, balls, batsmen1 } = innings;
+  const { totalRuns, wickets, balls, batsmen1, currentBowler } = innings;
+  console.log("batsmen1", batsmen1);
   const { totalRuns: totalRuns1, team: team1 } = firstInnings;
   const {
     totalRuns: totalRuns2,
@@ -48,13 +62,49 @@ export default function MainScore() {
     totalRuns,
     totalRuns2,
     wickets,
-    isFirstInnings,
+    bowlingBalls: currentBowler ? currentBowler.bowlingBalls : 0,
   });
+
+  const getPlayerDetails = (player, team, inningsKey) => {
+    const updatedPlayer = player ? omitProps("title", player) : null;
+    if (updatedPlayer) {
+      if (updatedPlayer.id) return updatedPlayer;
+      else {
+        const newPlayer = getNewPlayerDetails(updatedPlayer.name, team.id);
+        createPlayer(newPlayer);
+        dispatch(
+          cricketActions.addCricketPlayer({
+            key: inningsKey,
+            value: newPlayer,
+          })
+        );
+        return newPlayer;
+      }
+    }
+    return updatedPlayer;
+  };
 
   const startNewInnings = (data) => {
     setOpenDialog(false);
     if (data) {
-      dispatch(cricketActions.endInnings(data));
+      let { striker, nonStriker, bowler, startLater } = data;
+      // let striker, nonStriker, bowler = null;
+      if (!startLater) {
+        const battingTeam = isFirstInnings
+          ? firstInnings.team
+          : secondInnings.team;
+        const bowlingTeam = isFirstInnings
+          ? secondInnings.team
+          : firstInnings.team;
+        const inningsKey = isFirstInnings ? "firstInnings" : "secondInnings";
+        const innings2Key = isFirstInnings ? "secondInnings" : "firstInnings";
+        striker = getPlayerDetails(striker, battingTeam, inningsKey);
+        nonStriker = getPlayerDetails(nonStriker, battingTeam, inningsKey);
+        bowler = getPlayerDetails(bowler, bowlingTeam, innings2Key);
+      }
+      dispatch(
+        cricketActions.endInnings({ startLater, striker, nonStriker, bowler })
+      );
     }
   };
 
@@ -99,7 +149,7 @@ export default function MainScore() {
           )}
           {(!batsmen1 || isFirstInnings) && (
             <AvatarIcon
-              icon={<BlockIcon />}
+              icon={<StartIcon />}
               handleClick={() => setOpenDialog(true)}
               tooltip="Start Next Innings"
             />
@@ -123,7 +173,9 @@ export default function MainScore() {
           )}
           bowlers={firstInnings?.players}
           remainingOvers={remainingOvers}
-          stopInnings={playersPerTeam !== firstInnings.wickets + 1}
+          stopInnings={
+            isFirstInnings && playersPerTeam !== firstInnings.wickets + 1
+          }
         />
       )}
       {endDialog && (
@@ -141,3 +193,11 @@ export default function MainScore() {
     </div>
   );
 }
+
+const createPlayer = async (player) => {
+  try {
+    await setDoc(doc(db, "players", player.id), player);
+  } catch (err) {
+    alert(err);
+  }
+};

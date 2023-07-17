@@ -22,7 +22,7 @@ export default function ToggleButtons({ value, items, handleSelection, id }) {
       aria-label={id}
       size="small"
       color="primary"
-      sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}
+      sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}
       key={id}
     >
       {items &&

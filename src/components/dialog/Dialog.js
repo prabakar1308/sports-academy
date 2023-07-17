@@ -11,6 +11,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import Avatar from "@mui/material/Avatar";
 import AddIcon from "@mui/icons-material/Add";
 import { blue } from "@mui/material/colors";
+import { v4 as uuid } from "uuid";
 
 import { Timestamp } from "firebase/firestore/lite";
 
@@ -49,14 +50,16 @@ export default function ModalDialog(props) {
       Math,
       teams.map((te) => te.id)
     );
+    const client = JSON.parse(sessionStorage.getItem("client"));
     onClose({
       isNew: true,
       value: {
-        id: latestId + 1,
+        id: uuid(),
         name,
         area,
         isActive: true,
         created: Timestamp.now(),
+        clientId: client ? client.clientId : 0,
       },
     });
     setArea("");
