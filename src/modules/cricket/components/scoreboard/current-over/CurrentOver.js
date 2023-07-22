@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import Badge from "@mui/material/Badge";
-import { Grid } from "@mui/material";
+import Grid from "@mui/material/Grid";
 
 export default function CurrentOver({ overDetails }) {
   const details = ["0", "6", "4", "3", "W", "4"];

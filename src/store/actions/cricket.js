@@ -21,6 +21,7 @@ export const UPDATE_MATCH_LIST = "[cricket] UPDATE_MATCH_LIST";
 export const SET_MATCH_DETAILS = "[cricket] SET_MATCH_DETAILS";
 export const UPDATE_PLAYER_SCORE = "[cricket] UPDATE_PLAYER_SCORE";
 export const RESET_MATCH_DETAILS = "[cricket] RESET_MATCH_DETAILS";
+export const SAVE_MATCH = "[cricket] SAVE_MATCH";
 
 export const getCricketTeams = (teams) => {
   return {
@@ -163,5 +164,11 @@ export const updatePlayerScore = (data) => {
   return {
     type: UPDATE_PLAYER_SCORE,
     payload: data,
+  };
+};
+
+export const saveCricketMatch = () => {
+  return {
+    type: SAVE_MATCH,
   };
 };

@@ -1,5 +1,9 @@
 import { Timestamp } from "firebase/firestore/lite";
+import Badge from "@mui/material/Badge";
+import Avatar from "@mui/material/Avatar";
+import Stack from "@mui/material/Stack";
 import { v4 as uuid } from "uuid";
+import { isMobile } from "react-device-detect";
 
 export const omitProps = (key, obj) => {
   const { [key]: omitted, ...rest } = obj;
@@ -58,6 +62,7 @@ export const getNewPlayerDetails = (name, teamId) => {
     highestScore: 0,
     highestScoreNotOut: false,
     fours: 0,
+    dotBalls: 0,
     sixes: 0,
     catches: 0,
     wickets: 0,
@@ -66,6 +71,7 @@ export const getNewPlayerDetails = (name, teamId) => {
     // bowlingAverage: 0, //
     bowlingRuns: 0,
     bowlingBalls: 0,
+    bowlingDotBalls: 0,
     // strikeRate: 0, //
     // innings: 0,
     outs: 0,
@@ -82,14 +88,80 @@ export const setPlayerForCurrentMatch = (player) => {
     runs: 0,
     balls: 0,
     fours: 0,
+    dotBalls: 0,
     sixes: 0,
     wickets: 0,
     catches: 0,
     bowlingBalls: 0,
+    bowlingDotBalls: 0,
     bowlingRuns: 0,
     overs: 0,
     maidens: 0,
   };
+};
+
+export const getBallDetails = ({
+  runs,
+  wicket,
+  runout,
+  wide,
+  noBall,
+  byes,
+}) => {
+  let value = runs;
+  let color = "warning";
+  if (wide) value = "WD";
+  else if (noBall) value = "NB";
+  else if (byes) {
+    value = "B";
+    color = "secondary";
+  }
+  return runout || wide || noBall || byes ? value : "";
+};
+
+const currentValue = ({ runs, wicket, runout, wide, noBall }) => {
+  let value = runs;
+  if (wicket || runout) value = "W";
+  // else if (wide) value = "WD";
+  // else if (noBall) value = "NB"
+  return value;
+};
+
+export const getOverBalls = (curBalls) => {
+  return (
+    <Stack direction="row" spacing={isMobile ? 0 : 2}>
+      {curBalls &&
+        curBalls.map((det, index) => {
+          const { wicket, runout, runs, wide, noBall } = det;
+          const isWicket = det?.wicket;
+          return (
+            <div key={index}>
+              <Avatar
+                sx={{
+                  width: isMobile ? 25 : 30,
+                  height: isMobile ? 25 : 30,
+                  fontSize: isMobile ? 8 : 12,
+                  color: "black",
+                  bgcolor: () => {
+                    if (wicket || runout) return "lightcoral";
+                    else if (runs && (runs === 4 || runs === 6))
+                      return "lightgreen";
+                    else if (wide || noBall) return "#ecdfb3";
+                    else if (runs === 0) return "lightgray";
+                    else return "#b4f7e2";
+                  },
+                  border: "2px solid lightgray",
+                }}
+              >
+                {currentValue(det)}
+                {getBallDetails(det)}
+              </Avatar>
+              {/* {getBallDetails(det)} */}
+            </div>
+          );
+        })}
+    </Stack>
+  );
 };
 
 // export const createPlayer = async (player) => {

@@ -8,11 +8,12 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ScoreboardIcon from "@mui/icons-material/Scoreboard";
-import AvatarIcon from "../../components/avatar-icon/AvatarIcon";
 import { setDoc, deleteDoc, doc, Timestamp } from "firebase/firestore/lite";
+import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+import ReactToPrint from "react-to-print";
 
 import CardComponent from "../../components/card/Card";
-
+import AvatarIcon from "../../components/avatar-icon/AvatarIcon";
 import { db } from "../../database/firebase.db";
 import { getRequiredRunDetails } from "./utils";
 import "./cricket.scss";
@@ -23,6 +24,7 @@ const Cricket = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const componentRef = React.useRef();
 
   const {
     matchDetails,
@@ -94,7 +96,9 @@ const Cricket = () => {
     };
 
     window.addEventListener("beforeunload", unloadCallback);
-    return () => window.removeEventListener("beforeunload", unloadCallback);
+    return () => {
+      window.removeEventListener("beforeunload", unloadCallback);
+    };
   }, []);
 
   React.useEffect(() => {
@@ -144,8 +148,43 @@ const Cricket = () => {
     navigate(url);
   };
 
+  // const handleDownload = useReactToPrint({
+  //   onPrintError: (error) => console.log(error),
+  //   content: () => componentRef.current,
+  //   removeAfterPrint: true,
+  //   print: async (printIframe) => {
+  //     const document = printIframe.contentDocument;
+  //     console.log(document);
+
+  //     const html = document.getElementById("element-to-download-as-pdf");
+  //     console.log(html);
+  //     const canvas = await html2canvas(html, { scrollY: -window.scrollY });
+  //     console.log("data", canvas);
+  //     const imgData = canvas.toDataURL("image/png");
+  //     const pdf = new jsPDF();
+  //     pdf.addImage(imgData, "JPEG", 0, 0);
+  //     // pdf.output('dataurlnewwindow');
+  //     pdf.save("download.pdf");
+  //     // html2canvas(html).then((canvas) => {
+  //     //   console.log(canvas);
+  //     //   const imgData = canvas.toDataURL("image/png");
+  //     //   const pdf = new jsPDF();
+  //     //   pdf.addImage(imgData, "JPEG", 0, 0);
+  //     //   // pdf.output('dataurlnewwindow');
+  //     //   pdf.save("download.pdf");
+  //     // });
+
+  //     // if (document) {
+  //     //   const html = document.getElementById("element-to-download-as-pdf");
+  //     //   console.log(html);
+  //     // const exporter = new Html2Pdf(html, { filename: "Nota Simple.pdf" });
+  //     //   exporter.getPdf(true);
+  //     // }
+  //   },
+  // });
+
   return (
-    <div className="cric-dashboard">
+    <div className="cric-dashboard" ref={componentRef}>
       {(location.pathname === "/cricket/finalscore" ||
         location.pathname === "/cricket/scoreboard") &&
       isMatchStarted ? (
@@ -172,7 +211,11 @@ const Cricket = () => {
                   </span>{" "}
                   vs{" "}
                   <span
-                    className={!isFirstInnings ? "team-name-highlight" : ""}
+                    className={
+                      !isFirstInnings && !isMatchCompleted
+                        ? "team-name-highlight"
+                        : ""
+                    }
                   >
                     {team2.name}
                   </span>
@@ -202,6 +245,16 @@ const Cricket = () => {
                 />
               </ListItemAvatar>
             )}
+            {isMatchCompleted && (
+              <ReactToPrint
+                trigger={() => (
+                  <ListItemAvatar>
+                    <AvatarIcon icon={<CloudDownloadIcon />} />
+                  </ListItemAvatar>
+                )}
+                content={() => componentRef.current}
+              />
+            )}
           </ListItem>
         </List>
       ) : (
@@ -223,9 +276,25 @@ const Cricket = () => {
           </Grid>
         </Grid>
       )}
-      {/* <button onClick={() => updatePlayersFirebase(team1Players)}>
+      {/* <button
+        onClick={() => {
+          return (
+            <ReactWhatsapp number="+91 9500107044" message="Hello World!!!" />
+          );
+        }}
+      >
         testtt
       </button> */}
+      {/* <PDFDownloadLink
+        document={<MyDocument scoreboard={scoreboard} />}
+        fileName="score.pdf"
+      >
+        Download PDF
+      </PDFDownloadLink> */}
+      {/* <PrintComponent scoreboard={scoreboard} /> */}
+      {/* <PDFViewer>
+        <MyDocument />
+      </PDFViewer> */}
       <Outlet />
     </div>
   );

@@ -2,6 +2,10 @@
   text-align: center;
 }
 
+.routes-section {
+  margin-bottom: 60px;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;

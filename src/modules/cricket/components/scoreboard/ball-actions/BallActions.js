@@ -541,7 +541,10 @@ export default function BallActions({ overDetails }) {
                 <Button
                   variant="contained"
                   color="secondary"
-                  onClick={() => updateMatch(scoreboard, matchDetails)}
+                  onClick={() => {
+                    updateMatch(scoreboard, matchDetails);
+                    dispatch(cricketActions.saveCricketMatch());
+                  }}
                   disabled={!(scoreboardEntries.length > 1)}
                   sx={{ marginLeft: "10px" }}
                 >

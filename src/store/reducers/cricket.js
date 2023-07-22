@@ -362,6 +362,8 @@ const cricketReducer = (state = initialState, action) => {
       };
       if (bValue) {
         // if (bValue.runs) {
+        const dotBallsCount =
+          (bValue.runs === 0 && !bValue.wide) || bValue.byes ? 1 : 0;
         const foursCount =
           bValue.runs === 4 && !bValue.wide && !bValue.byes ? 1 : 0;
         const sixesCount =
@@ -387,6 +389,9 @@ const cricketReducer = (state = initialState, action) => {
         const bowlingBalls = innings.currentBowler.bowlingBalls
           ? innings.currentBowler.bowlingBalls + currentBowlingBall
           : currentBowlingBall;
+        const bowlingDotBalls = innings.currentBowler.bowlingDotBalls
+          ? innings.currentBowler.bowlingDotBalls + dotBallsCount
+          : dotBallsCount;
         const bowlingWickets = innings.currentBowler.wickets
           ? innings.currentBowler.wickets + wickets
           : wickets;
@@ -409,6 +414,7 @@ const cricketReducer = (state = initialState, action) => {
           currentBowler: {
             ...innings.currentBowler,
             bowlingBalls,
+            bowlingDotBalls,
             bowlingRuns,
             econRate: Number.isInteger(er) ? er : parseFloat(er).toFixed(2),
             wickets: bowlingWickets,
@@ -418,6 +424,9 @@ const cricketReducer = (state = initialState, action) => {
             runs,
             balls,
             isStriker: strikerUpdate,
+            dotBalls: innings[strikerKey].dotBalls
+              ? innings[strikerKey].dotBalls + dotBallsCount
+              : dotBallsCount,
             fours: innings[strikerKey].fours
               ? innings[strikerKey].fours + foursCount
               : foursCount,
@@ -681,6 +690,13 @@ const cricketReducer = (state = initialState, action) => {
           team2Players,
         },
       };
+    }
+    case cricketActions.SAVE_MATCH: {
+      const entries = [...state.scoreboardEntries];
+      if (entries.length > 1) {
+        return { ...state, scoreboardEntries: [entries[entries.length - 1]] };
+      }
+      return state;
     }
     case cricketActions.UPDATE_PLAYER_SCORE: {
       const { matchDetails } = action.payload;
