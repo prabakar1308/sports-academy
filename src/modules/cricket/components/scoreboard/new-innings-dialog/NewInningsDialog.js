@@ -48,7 +48,7 @@ export default function NewInningsDialog(props) {
   };
 
   return (
-    <Dialog onClose={() => handleClose(null)} open={open}>
+    <Dialog open={open}>
       {/* <DialogTitle>{title}</DialogTitle> */}
 
       <div className="player-dialog-wrapper">

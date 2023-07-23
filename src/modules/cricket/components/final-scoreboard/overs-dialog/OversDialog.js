@@ -57,12 +57,12 @@ export default function OversDialog({ details: { balls, team }, handleClose }) {
         key={`item-${over}`}
         sx={{ overflowX: "auto", overflowY: "hidden", paddingBottom: "10px" }}
       >
-        <Grid item sx={{ width: "25%", marginTop: "5px" }}>
+        <Grid item sx={{ width: "25%", marginTop: "8px" }}>
           <Tooltip title={bowlerName}>
             <Chip
               sx={{
                 width: "100%",
-                marginLeft: "-5px",
+                // marginLeft: "-5px",
                 height: "20px",
                 backgroundColor: "#1e956d",
                 color: "white",

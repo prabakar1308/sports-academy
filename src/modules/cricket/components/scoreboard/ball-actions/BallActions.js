@@ -27,6 +27,7 @@ import EndMatchDialog from "../end-match-dialog/EndMatchDialog";
 import { getNewPlayerDetails, omitProps } from "../../../utils";
 import { WICKET_TYPES } from "../../../constants";
 import "./BallActions.scss";
+import ConfirmationDialog from "../../../../../components/confirmation-dialog/ConfirmationDialog";
 
 // const ball = {
 //   ballNo: 1,
@@ -60,6 +61,8 @@ export default function BallActions({ overDetails }) {
   const [isBatsmenRetire, setIsBatsmenRetire] = React.useState(false);
   const [openNewInningsDialog, setOpenNewInningsDialog] = React.useState(false);
   const [endDialog, setEndDialog] = React.useState(false);
+  // const [endInningConfirm, setEndInningConfirm] = React.useState(false);
+  const [endMatchConfirm, setEndMatchConfirm] = React.useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -116,8 +119,8 @@ export default function BallActions({ overDetails }) {
   };
 
   const startNewInnings = (data) => {
+    setOpenNewInningsDialog(false);
     if (data) {
-      setOpenNewInningsDialog(false);
       // dispatch(
       //   cricketActions.updateCurrentBolwer({
       //     bowlerKey: isFirstInnings ? "firstInnings" : "secondInnings",
@@ -158,7 +161,7 @@ export default function BallActions({ overDetails }) {
           penaltyRuns,
         })
       );
-    }
+    } else dispatch(cricketActions.undoScoreboard());
   };
 
   const handleClose = ({ value, isNew }) => {
@@ -207,7 +210,8 @@ export default function BallActions({ overDetails }) {
   const handleNewBatsmenClose = ({ wicketType, wicketHelpedBy, batsmen }) => {
     let newBatsmenStrike = true;
     if (playersPerTeam === wickets + 1) {
-      isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
+      // isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
+      isFirstInnings ? setOpenNewInningsDialog(true) : setEndMatchConfirm(true);
     }
     if (batsmen || wicketType || wicketHelpedBy) {
       // setBatsmenDialog(false);
@@ -323,7 +327,8 @@ export default function BallActions({ overDetails }) {
     const currInnTotalRuns = runs > 0 ? totalRuns + runs : totalRuns;
     if (overLastBall && totalOvers === overDetails.overNum) {
       // setOpenNewInningsDialog(true);
-      isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
+      // isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
+      isFirstInnings ? setOpenNewInningsDialog(true) : setEndMatchConfirm(true);
     } else if (!isFirstInnings && currInnTotalRuns > firstInnings.totalRuns) {
       setEndDialog(true);
     } else {
@@ -348,6 +353,18 @@ export default function BallActions({ overDetails }) {
         // nonStrikerKey: batsmen1 && batsmen1.isStriker ? "batsmen2" : "batsmen1",
       })
     );
+  };
+
+  // const handleEndInningConfirm = (val) => {
+  //   setEndInningConfirm(false);
+  //   if (val) setOpenNewInningsDialog(true);
+  //   else dispatch(cricketActions.undoScoreboard());
+  // };
+
+  const handleEndMatchConfirm = (val) => {
+    setEndMatchConfirm(false);
+    if (val) setEndDialog(true);
+    else dispatch(cricketActions.undoScoreboard());
   };
 
   const resetCheckBoxes = () => {
@@ -406,10 +423,19 @@ export default function BallActions({ overDetails }) {
                 <FormGroup
                   row
                   className="form-group-wrapper"
-                  sx={{ flexWrap: "wrap", gap: 1 }}
+                  sx={{
+                    flexWrap: "wrap",
+                    gap: 0.25,
+                    justifyContent: "center",
+                    paddingLeft: "25px",
+                  }}
+                  // justifyContent="center"
+                  // flexWrap={"wrap"}
+                  // useFlexGap
                 >
                   {wideAllowed && (
                     <FormControlLabel
+                      sx={{ width: "110px" }}
                       control={
                         <Checkbox
                           checked={wide}
@@ -426,6 +452,7 @@ export default function BallActions({ overDetails }) {
 
                   {noBallAllowed && (
                     <FormControlLabel
+                      sx={{ width: "110px" }}
                       control={
                         <Checkbox
                           checked={noBall}
@@ -442,6 +469,7 @@ export default function BallActions({ overDetails }) {
 
                   {byesAllowed && (
                     <FormControlLabel
+                      sx={{ width: "110px" }}
                       control={
                         <Checkbox
                           checked={byes}
@@ -457,6 +485,7 @@ export default function BallActions({ overDetails }) {
                   )}
 
                   <FormControlLabel
+                    sx={{ width: "110px" }}
                     control={
                       <Checkbox
                         checked={runout}
@@ -510,11 +539,13 @@ export default function BallActions({ overDetails }) {
             <Grid item>
               <Stack
                 spacing={2}
-                direction={{ xs: "column", sm: "row" }}
-                // flexWrap={"wrap"}
+                direction={{ xs: "row", sm: "row" }}
+                flexWrap={"wrap"}
+                useFlexGap
                 alignItems={"center"}
                 justifyContent={"center"}
-                sx={{ paddingTop: "16px" }}
+                // sx={{ paddingTop: "16px" }}
+                className="button-wrapper"
               >
                 <Button
                   variant="contained"
@@ -524,6 +555,7 @@ export default function BallActions({ overDetails }) {
                     setIsBatsmenRetire(true);
                     dispatch(cricketActions.archiveScoreboard());
                   }}
+                  sx={{ width: "150px", paddingLeft: "16px" }}
                 >
                   Retire
                 </Button>
@@ -531,7 +563,7 @@ export default function BallActions({ overDetails }) {
                   variant="contained"
                   color="secondary"
                   onClick={swapBatsmen}
-                  sx={{ marginLeft: "10px" }}
+                  sx={{ width: "150px" }}
                 >
                   Swap Batsmen
                 </Button>
@@ -540,6 +572,7 @@ export default function BallActions({ overDetails }) {
                   color="secondary"
                   onClick={() => dispatch(cricketActions.undoScoreboard())}
                   disabled={!(scoreboardEntries.length > 1)}
+                  sx={{ width: "150px" }}
                 >
                   Undo
                 </Button>
@@ -552,7 +585,7 @@ export default function BallActions({ overDetails }) {
                     dispatch(cricketActions.saveCricketMatch());
                   }}
                   disabled={!(scoreboardEntries.length > 1)}
-                  sx={{ marginLeft: "10px" }}
+                  sx={{ width: "150px" }}
                 >
                   Save
                 </Button>
@@ -616,6 +649,28 @@ export default function BallActions({ overDetails }) {
           team1={team1}
           team2={team2}
           allWickets={playersPerTeam === wickets + 1}
+        />
+      )}
+      {/* {endInningConfirm && (
+        <ConfirmationDialog
+          title={"Close Innings"}
+          actionBtnText={"Continue"}
+          cancelBtnText="Undo"
+          handleClose={handleEndInningConfirm}
+          confirmationText={
+            "Innings Completed! Click continue to start 2nd Innings"
+          }
+        />
+      )} */}
+      {endMatchConfirm && (
+        <ConfirmationDialog
+          title={"Close Match"}
+          actionBtnText={"Continue"}
+          cancelBtnText="Undo"
+          handleClose={handleEndMatchConfirm}
+          confirmationText={
+            "Match will be Completed! Click continue to close the match"
+          }
         />
       )}
     </div>

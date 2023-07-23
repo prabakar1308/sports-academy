@@ -66,7 +66,11 @@ export default function CurrentOver({ overDetails }) {
           alignItems={"start"}
         >
           <Grid item>
-            <Typography variant="h6" component="div">
+            <Typography
+              variant="button"
+              sx={{ paddingTop: "10px", marginLeft: "-5px" }}
+              component="div"
+            >
               This Over: <br />
             </Typography>
           </Grid>

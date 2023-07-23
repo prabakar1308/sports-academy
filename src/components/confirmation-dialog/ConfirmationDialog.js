@@ -9,6 +9,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 export default function ConfirmationDialog({
   title,
   actionBtnText,
+  cancelBtnText = "Cancel",
   confirmationText,
   handleClose,
 }) {
@@ -27,7 +28,7 @@ export default function ConfirmationDialog({
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleClose(null)}>Cancel</Button>
+          <Button onClick={() => handleClose(null)}>{cancelBtnText}</Button>
           <Button onClick={() => handleClose(true)} autoFocus>
             {actionBtnText}
           </Button>

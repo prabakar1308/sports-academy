@@ -147,8 +147,8 @@ export const getOverBalls = (curBalls) => {
                     else if (runs && (runs === 4 || runs === 6))
                       return "lightgreen";
                     else if (wide || noBall) return "#ecdfb3";
-                    else if (runs === 0) return "lightgray";
-                    else return "#b4f7e2";
+                    else if (runs === 0) return "#ececec";
+                    else return "#dcf4ed";
                   },
                   border: "2px solid lightgray",
                 }}
