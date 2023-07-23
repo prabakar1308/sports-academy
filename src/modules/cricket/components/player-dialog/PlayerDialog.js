@@ -14,35 +14,59 @@ import { Timestamp } from "firebase/firestore/lite";
 import { v4 as uuid } from "uuid";
 
 import "./PlayerDialog.scss";
-import { getNewPlayerDetails } from "../../utils";
+import { getNewPlayerDetails, omitProps } from "../../utils";
+import AutocompleteDropdown from "../../../../components/autocomplete-dropdown/AutocompleteDropdown";
 
 export default function PlayerDialog(props) {
-  const { onClose, team, open, title, players, currentBowler = null } = props;
+  const {
+    onClose,
+    team,
+    open,
+    title,
+    players,
+    excludedPlayerId = null,
+  } = props;
   // console.log("players", players, team);
-  const [isCreate, setIsCreate] = React.useState(false);
-  const [playerName, setPlayerName] = React.useState("");
+  // const [isCreate, setIsCreate] = React.useState(false);
+  // const [playerName, setPlayerName] = React.useState("");
 
   const handleClose = (value) => {
     onClose({ isNew: false, value });
   };
 
-  const createNewPlayer = () => {
-    setIsCreate(false);
+  const createNewPlayer = (name) => {
+    // setIsCreate(false);
     onClose({
       isNew: true,
-      value: getNewPlayerDetails(playerName, team.id),
+      value: getNewPlayerDetails(name, team.id),
     });
-    setPlayerName("");
+    // setPlayerName("");
   };
+
+  const handleChange = (val) => {
+    console.log(val);
+    if (val) {
+      const value = omitProps("title", val);
+      if (value.id) handleClose(value);
+      else createNewPlayer(value.name);
+    }
+  };
+
+  const playerItems = players
+    .filter((pl) => pl.id !== excludedPlayerId)
+    .map((bow) => ({
+      ...bow,
+      title: bow.name,
+    }));
 
   return (
     <Dialog onClose={() => handleClose(null)} open={open}>
-      <DialogTitle>
-        {title} ({team?.name})
+      <DialogTitle sx={{ paddingLeft: "0px", paddingBottom: "0px" }}>
+        {team?.name}
       </DialogTitle>
 
       <div className="player-dialog-wrapper">
-        <Box
+        {/* <Box
           sx={{
             display: "flex",
             flexWrap: "wrap",
@@ -52,10 +76,10 @@ export default function PlayerDialog(props) {
               height: 40,
             },
           }}
-        >
-          {/* <div className="player-dialog-wrapper"> */}
+        > */}
+        {/* <div className="player-dialog-wrapper"> */}
 
-          {[...players]
+        {/* {[...players]
             .sort((a, b) => a.name.localeCompare(b.name))
             .map((player, index) => {
               return currentBowler && currentBowler.id === player.id ? null : (
@@ -87,11 +111,18 @@ export default function PlayerDialog(props) {
                 <AddIcon />
               </Avatar>
             </div>
-          </Paper>
-          {/* </div> */}
-        </Box>
+          </Paper> */}
+        <AutocompleteDropdown
+          id="player-ac"
+          dropdownOptions={playerItems}
+          placeholder={title}
+          handleChange={handleChange}
+          width={250}
+        />
+        {/* </div> */}
+        {/* </Box> */}
 
-        {isCreate && (
+        {/* {isCreate && (
           <Stack direction="column" spacing={2}>
             <TextField
               id="standard-basic"
@@ -111,7 +142,7 @@ export default function PlayerDialog(props) {
               Add Player
             </Button>
           </Stack>
-        )}
+        )} */}
       </div>
     </Dialog>
   );

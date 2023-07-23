@@ -111,6 +111,9 @@ const initialState = {
     },
   },
   scoreboardEntries: [],
+  // this will used to save data in db when match or innings closed manually
+  // (when scoreboardEntries length is 1)
+  unSavedActions: false,
 };
 
 const cricketReducer = (state = initialState, action) => {
@@ -525,8 +528,14 @@ const cricketReducer = (state = initialState, action) => {
       };
     }
     case cricketActions.END_INNINGS: {
-      const { striker, nonStriker, bowler, startLater } = action.payload;
-      console.log("action.payload", action.payload);
+      const {
+        striker,
+        nonStriker,
+        bowler,
+        startLater,
+        penaltyRuns,
+        unSavedActions = false,
+      } = action.payload;
       let secondInnings = {
         ...state.scoreboard.secondInnings,
       };
@@ -611,14 +620,17 @@ const cricketReducer = (state = initialState, action) => {
             ...firstInnings,
             bowlers,
             players,
+            totalRuns: firstInnings.totalRuns + penaltyRuns,
           },
         },
+        unSavedActions,
       };
     }
     case cricketActions.END_MATCH: {
       const {
         resultText = "RCB won by 1 runs!",
         teamWon = { ...state.matchDetails.team1 },
+        unSavedActions = false,
       } = action.payload || {};
 
       // update batsmen & bowlers
@@ -689,6 +701,7 @@ const cricketReducer = (state = initialState, action) => {
           team1Players,
           team2Players,
         },
+        unSavedActions,
       };
     }
     case cricketActions.SAVE_MATCH: {

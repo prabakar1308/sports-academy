@@ -87,7 +87,7 @@ export default function MainScore() {
   const startNewInnings = (data) => {
     setOpenDialog(false);
     if (data) {
-      let { striker, nonStriker, bowler, startLater } = data;
+      let { striker, nonStriker, bowler, startLater, penaltyRuns } = data;
       // let striker, nonStriker, bowler = null;
       if (!startLater) {
         const battingTeam = isFirstInnings
@@ -103,7 +103,14 @@ export default function MainScore() {
         bowler = getPlayerDetails(bowler, bowlingTeam, innings2Key);
       }
       dispatch(
-        cricketActions.endInnings({ startLater, striker, nonStriker, bowler })
+        cricketActions.endInnings({
+          startLater,
+          striker,
+          nonStriker,
+          bowler,
+          penaltyRuns,
+          unSavedActions: true,
+        })
       );
     }
   };
@@ -111,7 +118,9 @@ export default function MainScore() {
   const endMatch = (data) => {
     setEndDialog(false);
     if (data) {
-      dispatch(cricketActions.endCricketMatch(data));
+      dispatch(
+        cricketActions.endCricketMatch({ ...data, unSavedActions: true })
+      );
       navigate("/cricket/finalscore");
     }
   };

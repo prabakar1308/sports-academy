@@ -42,7 +42,20 @@ export default function ExtrasDialog({
         noBall = noBall + 1;
       }
     });
-    return `${wide + noBall} (${wide} WD, ${noBall} NB)`;
+    return (
+      <span className="extras-total">
+        <Avatar
+          sx={{
+            width: 24,
+            height: 24,
+            marginRight: "5px",
+            backgroundColor: "cadetblue",
+            fontSize: "16px",
+          }}
+        >{`${wide + noBall}`}</Avatar>{" "}
+        ({wide} WD, {noBall} NB)
+      </span>
+    );
   };
 
   const getExtraDetails = (bowler, index) => {

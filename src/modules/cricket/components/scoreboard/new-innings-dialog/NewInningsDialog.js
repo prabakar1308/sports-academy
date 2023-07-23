@@ -1,13 +1,12 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import Dialog from "@mui/material/Dialog";
-import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 
 import "./NewInningsDialog.scss";
-import ToggleButtons from "../../../../../components/toggleButton/ToggleButton";
 import AutocompleteDropdown from "../../../../../components/autocomplete-dropdown/AutocompleteDropdown";
+import { TextField } from "@mui/material";
 
 export default function NewInningsDialog(props) {
   const {
@@ -24,6 +23,7 @@ export default function NewInningsDialog(props) {
   const [striker, setStriker] = React.useState(null);
   const [nonStriker, setNonStriker] = React.useState(null);
   const [bowler, setBowler] = React.useState(null);
+  const [penaltyRuns, setPenaltyRuns] = React.useState(0);
 
   const handleClose = (value) => {
     onClose(value);
@@ -113,12 +113,30 @@ export default function NewInningsDialog(props) {
             handleChange={(val) => setBowler(val)}
           />
         </div>
-
+        <div className="wicket-type">
+          <TextField
+            id="standard-basic"
+            label="Penalty Runs"
+            type="number"
+            variant="filled"
+            value={penaltyRuns}
+            size="small"
+            onChange={(event) => {
+              setPenaltyRuns(parseInt(event.target.value || 0, 10));
+            }}
+          />
+        </div>
         <Button
           variant="contained"
           disabled={disableButton()}
           onClick={() =>
-            onClose({ striker, nonStriker, bowler, startLater: false })
+            onClose({
+              striker,
+              nonStriker,
+              bowler,
+              startLater: false,
+              penaltyRuns,
+            })
           }
           className="update-button"
         >
@@ -127,7 +145,7 @@ export default function NewInningsDialog(props) {
 
         <Button
           variant="outlined"
-          onClick={() => onClose({ startLater: true })}
+          onClick={() => onClose({ startLater: true, penaltyRuns })}
           className="update-button"
         >
           Later

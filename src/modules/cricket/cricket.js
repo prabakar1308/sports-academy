@@ -39,6 +39,7 @@ const Cricket = () => {
       isMatchCompleted,
       isMatchStarted,
     },
+    unSavedActions,
   } = useSelector((state) => state.cricket);
 
   const { totalRuns, team, totalBalls, players: players1 } = firstInnings;
@@ -74,6 +75,7 @@ const Cricket = () => {
       description: "View the list of matches played",
       image: require("../../images/cricket-tournament.jpg"),
       link: "/cricket/matches",
+      handleClick: () => dispatch(cricketActions.resetMatchDetails()),
     },
     {
       title: "View Players",
@@ -112,6 +114,13 @@ const Cricket = () => {
         const players = [...team1Players, ...team2Players];
         updatePlayersFirebase(players);
       }
+    } else if (!isFirstInnings && unSavedActions) {
+      // when first innings closed manually without balls bowled (set target as penalty runs)
+      updateMatch(scoreboard, matchDetails);
+    } else if (isMatchCompleted && unSavedActions) {
+      // when match closed manually after the save action
+      const players = [...team1Players, ...team2Players];
+      updatePlayersFirebase(players);
     }
   }, [isFirstInnings, isMatchCompleted]);
 

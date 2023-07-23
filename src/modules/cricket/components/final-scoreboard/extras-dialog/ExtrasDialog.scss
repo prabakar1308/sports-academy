@@ -7,6 +7,11 @@
   .MuiDivider-root {
     margin: 10px 0;
   }
+
+  .extras-total {
+    display: flex;
+    flex-direction: row;
+  }
 }
 
 .extras-dialog-app-bar {

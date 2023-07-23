@@ -126,7 +126,7 @@ export default function BallActions({ overDetails }) {
       //     currentOver: over,
       //   })
       // );
-      let { striker, nonStriker, bowler, startLater } = data;
+      let { striker, nonStriker, bowler, startLater, penaltyRuns } = data;
       // let striker, nonStriker, bowler = null;
       if (!startLater) {
         // const battingTeam = isFirstInnings
@@ -150,7 +150,13 @@ export default function BallActions({ overDetails }) {
         bowler = getPlayerDetails(bowler, firstInnings.team, "firstInnings");
       }
       dispatch(
-        cricketActions.endInnings({ startLater, striker, nonStriker, bowler })
+        cricketActions.endInnings({
+          startLater,
+          striker,
+          nonStriker,
+          bowler,
+          penaltyRuns,
+        })
       );
     }
   };
@@ -567,7 +573,7 @@ export default function BallActions({ overDetails }) {
           open={openDialog}
           onClose={handleClose}
           title={"Select Bowler"}
-          currentBowler={currentBowler}
+          excludedPlayerId={currentBowler?.id}
           players={bowlingInnings?.players}
         />
       )}
