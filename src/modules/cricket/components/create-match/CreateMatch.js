@@ -20,6 +20,7 @@ import ModalDialog from "../../../../components/dialog/Dialog";
 import MatchToss from "../match-toss/MatchToss";
 import { db } from "../../../../database/firebase.db";
 import * as cricketActions from "../../../../store/actions/cricket";
+import { setPlayerForCurrentMatch } from "../../utils";
 
 const CreateMatch = () => {
   const [open, setOpen] = React.useState(false);
@@ -144,19 +145,22 @@ const CreateMatch = () => {
     const key = isFirst ? "team1Players" : "team2Players";
     const teamKey = isFirst ? "team1" : "team2";
     const q = query(
-      collection(db, "Players"),
+      collection(db, "players"),
       where("teamId", "==", team.id),
       orderBy("created", "desc")
     );
+    console.log("sdfsssssssssssssssssssssssssssssssssssssssss");
     onSnapshot(q, (querySnapshot) => {
       const value = querySnapshot.docs.map((doc) => doc.data());
       // dispatch(cricketActions.updateCricketFields({ key, value }));
+      // const updatedPlayers = setPlayerForCurrentMatch(value);
       dispatch(
         cricketActions.updateMatchDetails({
           [key]: value,
           [teamKey]: team,
         })
       );
+      // dispatch(cricketActions.updateCricketFields({ key, value }));
       // console.log("players", { key, value });
     });
   };
@@ -175,13 +179,13 @@ const CreateMatch = () => {
         <Chip
           onClick={() => handleClickOpen(true)}
           label={firstTeam ? firstTeam.name : "Select Team A"}
-          onDelete={handleDelete}
+          // onDelete={handleDelete}
         />
         <Avatar sx={{ width: 30, height: 30 }}>vs</Avatar>
         <Chip
           onClick={() => handleClickOpen(false)}
           label={secondTeam ? secondTeam.name : "Select Team B"}
-          onDelete={handleDelete}
+          // onDelete={handleDelete}
         />
       </Stack>
       {firstTeam && secondTeam && firstTeam.id === secondTeam.id && (

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation, Outlet, useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -8,22 +8,27 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ScoreboardIcon from "@mui/icons-material/Scoreboard";
-import AvatarIcon from "../../components/avatar-icon/AvatarIcon";
-import { setDoc, doc, Timestamp } from "firebase/firestore/lite";
+import { setDoc, deleteDoc, doc, Timestamp } from "firebase/firestore/lite";
+import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+import ReactToPrint from "react-to-print";
 
 import CardComponent from "../../components/card/Card";
-
+import AvatarIcon from "../../components/avatar-icon/AvatarIcon";
 import { db } from "../../database/firebase.db";
 import { getRequiredRunDetails } from "./utils";
 import "./cricket.scss";
+import * as cricketActions from "../../store/actions/cricket";
+import { updatePlayersFirebase } from "./db-operations";
 
 const Cricket = () => {
   const location = useLocation();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const componentRef = React.useRef();
 
   const {
     matchDetails,
-    matchDetails: { overs },
+    matchDetails: { overs, team1Players, team2Players },
     scoreboardEntries,
     scoreboard,
     scoreboard: {
@@ -34,15 +39,18 @@ const Cricket = () => {
       isMatchCompleted,
       isMatchStarted,
     },
+    unSavedActions,
   } = useSelector((state) => state.cricket);
 
-  const { totalRuns, team, totalBalls } = firstInnings;
+  const { totalRuns, team, totalBalls, players: players1 } = firstInnings;
   const {
     totalRuns: totalRuns2,
     totalBalls: totalBalls2,
     wickets,
     balls,
     team: team2,
+    players: players2,
+    currentBowler,
   } = secondInnings;
 
   const { runsRequired, rrr, remainingBalls } = getRequiredRunDetails({
@@ -51,6 +59,7 @@ const Cricket = () => {
     totalRuns,
     totalRuns2,
     wickets,
+    bowlingBalls: currentBowler ? currentBowler.bowlingBalls : 0,
   });
 
   const cardList = [
@@ -59,17 +68,19 @@ const Cricket = () => {
       description: "Manages scoreboard",
       image: require("../../images/cricket.jpg"),
       link: "/cricket/new-match",
+      handleClick: () => dispatch(cricketActions.resetMatchDetails()),
     },
     {
       title: "View Matches",
       description: "View the list of matches played",
-      image: require("../../images/cricket-teams.jpg"),
+      image: require("../../images/cricket-tournament.jpg"),
       link: "/cricket/matches",
+      handleClick: () => dispatch(cricketActions.resetMatchDetails()),
     },
     {
-      title: "Schedule Tournaments",
-      description: "Create tournaments and schedule fixtures",
-      image: require("../../images/cricket-tournament.jpg"),
+      title: "View Players",
+      description: "View player profile",
+      image: require("../../images/cricket-teams.jpg"),
       link: "/cricket/new-match",
     },
   ];
@@ -81,8 +92,15 @@ const Cricket = () => {
       return "";
     };
 
+    window.history.pushState(null, null, location.href);
+    window.onpopstate = function (event) {
+      window.history.go(1);
+    };
+
     window.addEventListener("beforeunload", unloadCallback);
-    return () => window.removeEventListener("beforeunload", unloadCallback);
+    return () => {
+      window.removeEventListener("beforeunload", unloadCallback);
+    };
   }, []);
 
   React.useEffect(() => {
@@ -90,6 +108,19 @@ const Cricket = () => {
       // update match in db
       console.log("match updated in DB");
       updateMatch(scoreboard, matchDetails);
+
+      // update players in db
+      if (isMatchCompleted) {
+        const players = [...team1Players, ...team2Players];
+        updatePlayersFirebase(players);
+      }
+    } else if (!isFirstInnings && unSavedActions) {
+      // when first innings closed manually without balls bowled (set target as penalty runs)
+      updateMatch(scoreboard, matchDetails);
+    } else if (isMatchCompleted && unSavedActions) {
+      // when match closed manually after the save action
+      const players = [...team1Players, ...team2Players];
+      updatePlayersFirebase(players);
     }
   }, [isFirstInnings, isMatchCompleted]);
 
@@ -126,8 +157,43 @@ const Cricket = () => {
     navigate(url);
   };
 
+  // const handleDownload = useReactToPrint({
+  //   onPrintError: (error) => console.log(error),
+  //   content: () => componentRef.current,
+  //   removeAfterPrint: true,
+  //   print: async (printIframe) => {
+  //     const document = printIframe.contentDocument;
+  //     console.log(document);
+
+  //     const html = document.getElementById("element-to-download-as-pdf");
+  //     console.log(html);
+  //     const canvas = await html2canvas(html, { scrollY: -window.scrollY });
+  //     console.log("data", canvas);
+  //     const imgData = canvas.toDataURL("image/png");
+  //     const pdf = new jsPDF();
+  //     pdf.addImage(imgData, "JPEG", 0, 0);
+  //     // pdf.output('dataurlnewwindow');
+  //     pdf.save("download.pdf");
+  //     // html2canvas(html).then((canvas) => {
+  //     //   console.log(canvas);
+  //     //   const imgData = canvas.toDataURL("image/png");
+  //     //   const pdf = new jsPDF();
+  //     //   pdf.addImage(imgData, "JPEG", 0, 0);
+  //     //   // pdf.output('dataurlnewwindow');
+  //     //   pdf.save("download.pdf");
+  //     // });
+
+  //     // if (document) {
+  //     //   const html = document.getElementById("element-to-download-as-pdf");
+  //     //   console.log(html);
+  //     // const exporter = new Html2Pdf(html, { filename: "Nota Simple.pdf" });
+  //     //   exporter.getPdf(true);
+  //     // }
+  //   },
+  // });
+
   return (
-    <div className="cric-dashboard">
+    <div className="cric-dashboard" ref={componentRef}>
       {(location.pathname === "/cricket/finalscore" ||
         location.pathname === "/cricket/scoreboard") &&
       isMatchStarted ? (
@@ -149,11 +215,17 @@ const Cricket = () => {
             <ListItemText
               primary={
                 <span>
-                  <span className={isFirstInnings && "team-name-highlight"}>
+                  <span className={isFirstInnings ? "team-name-highlight" : ""}>
                     {team.name}
                   </span>{" "}
                   vs{" "}
-                  <span className={!isFirstInnings && "team-name-highlight"}>
+                  <span
+                    className={
+                      !isFirstInnings && !isMatchCompleted
+                        ? "team-name-highlight"
+                        : ""
+                    }
+                  >
                     {team2.name}
                   </span>
                 </span>
@@ -182,6 +254,16 @@ const Cricket = () => {
                 />
               </ListItemAvatar>
             )}
+            {isMatchCompleted && (
+              <ReactToPrint
+                trigger={() => (
+                  <ListItemAvatar>
+                    <AvatarIcon icon={<CloudDownloadIcon />} />
+                  </ListItemAvatar>
+                )}
+                content={() => componentRef.current}
+              />
+            )}
           </ListItem>
         </List>
       ) : (
@@ -203,6 +285,25 @@ const Cricket = () => {
           </Grid>
         </Grid>
       )}
+      {/* <button
+        onClick={() => {
+          return (
+            <ReactWhatsapp number="+91 9500107044" message="Hello World!!!" />
+          );
+        }}
+      >
+        testtt
+      </button> */}
+      {/* <PDFDownloadLink
+        document={<MyDocument scoreboard={scoreboard} />}
+        fileName="score.pdf"
+      >
+        Download PDF
+      </PDFDownloadLink> */}
+      {/* <PrintComponent scoreboard={scoreboard} /> */}
+      {/* <PDFViewer>
+        <MyDocument />
+      </PDFViewer> */}
       <Outlet />
     </div>
   );

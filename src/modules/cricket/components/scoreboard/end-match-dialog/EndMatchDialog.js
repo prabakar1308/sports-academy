@@ -56,7 +56,7 @@ export default function EndMatchDialog(props) {
       {/* <DialogTitle>Match Result</DialogTitle> */}
 
       <div className="end-innings-dialog-wrapper">
-        {!allWickets && remainingOvers && runMargin > 0 && (
+        {!allWickets && remainingOvers && runMargin > 0 ? (
           <>
             <Alert severity="warning">
               {remainingOvers} overs remaining in this innings!
@@ -73,7 +73,7 @@ export default function EndMatchDialog(props) {
               />
             </div>
           </>
-        )}
+        ) : null}
         <Alert severity="success">
           <AlertTitle>Match Result</AlertTitle>
           {text}

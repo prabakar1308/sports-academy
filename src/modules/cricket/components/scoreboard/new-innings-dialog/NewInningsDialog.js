@@ -1,12 +1,12 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import Dialog from "@mui/material/Dialog";
-import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 
 import "./NewInningsDialog.scss";
-import ToggleButtons from "../../../../../components/toggleButton/ToggleButton";
+import AutocompleteDropdown from "../../../../../components/autocomplete-dropdown/AutocompleteDropdown";
+import { TextField } from "@mui/material";
 
 export default function NewInningsDialog(props) {
   const {
@@ -17,23 +17,38 @@ export default function NewInningsDialog(props) {
     remainingOvers,
     stopInnings = false,
   } = props;
-  const bowlerItems = bowlers.map((bow) => ({ ...bow, value: bow.name }));
-  const batsmenItems = players.map((bat) => ({ ...bat, value: bat.name }));
+  const bowlerItems = bowlers.map((bow) => ({ ...bow, title: bow.name }));
+  const batsmenItems = players.map((bat) => ({ ...bat, title: bat.name }));
 
   const [striker, setStriker] = React.useState(null);
   const [nonStriker, setNonStriker] = React.useState(null);
   const [bowler, setBowler] = React.useState(null);
+  const [penaltyRuns, setPenaltyRuns] = React.useState(0);
 
   const handleClose = (value) => {
     onClose(value);
   };
 
   const disableButton = () => {
-    return !(striker && nonStriker && bowler && striker.id !== nonStriker.id);
+    let ctdn = true;
+    if (striker && nonStriker && striker.id && nonStriker.id) {
+      ctdn = striker.id != nonStriker.id;
+    } else {
+      ctdn = striker && nonStriker && striker.name != nonStriker.name;
+    }
+    return !(striker && nonStriker && bowler && ctdn);
+  };
+
+  const errorMsg = () => {
+    if (striker && nonStriker && striker.id && nonStriker.id) {
+      return striker.id === nonStriker.id;
+    } else {
+      return striker && nonStriker && striker.name === nonStriker.name;
+    }
   };
 
   return (
-    <Dialog onClose={() => handleClose(null)} open={open}>
+    <Dialog open={open}>
       {/* <DialogTitle>{title}</DialogTitle> */}
 
       <div className="player-dialog-wrapper">
@@ -43,7 +58,7 @@ export default function NewInningsDialog(props) {
           </Alert>
         )}
         <div className="wicket-type">
-          <Typography variant="subtitle2" gutterBottom>
+          {/* <Typography variant="subtitle2" gutterBottom>
             Select Striker
           </Typography>
           <ToggleButtons
@@ -51,10 +66,16 @@ export default function NewInningsDialog(props) {
             items={batsmenItems}
             value={null}
             handleSelection={(val) => setStriker(val)}
+          /> */}
+          <AutocompleteDropdown
+            id="batsmen-1-ac"
+            dropdownOptions={batsmenItems}
+            placeholder="Select Striker"
+            handleChange={(val) => setStriker(val)}
           />
         </div>
         <div className="wicket-type">
-          <Typography variant="subtitle2" gutterBottom>
+          {/* <Typography variant="subtitle2" gutterBottom>
             Select Non Striker
           </Typography>
           <ToggleButtons
@@ -62,15 +83,21 @@ export default function NewInningsDialog(props) {
             items={batsmenItems}
             value={null}
             handleSelection={(val) => setNonStriker(val)}
+          /> */}
+          <AutocompleteDropdown
+            id="batsmen-2-ac"
+            dropdownOptions={batsmenItems}
+            placeholder="Select Non Striker"
+            handleChange={(val) => setNonStriker(val)}
           />
         </div>
-        {striker && nonStriker && striker.id === nonStriker.id && (
+        {errorMsg() && (
           <Alert severity="error" sx={{ marginTop: "20px" }}>
             Please select different Batsmen!
           </Alert>
         )}
         <div className="wicket-type">
-          <Typography variant="subtitle2" gutterBottom>
+          {/* <Typography variant="subtitle2" gutterBottom>
             Select Bowler
           </Typography>
           <ToggleButtons
@@ -78,14 +105,38 @@ export default function NewInningsDialog(props) {
             items={bowlerItems}
             value={null}
             handleSelection={(val) => setBowler(val)}
+          /> */}
+          <AutocompleteDropdown
+            id="bowler-1-ac"
+            dropdownOptions={bowlerItems}
+            placeholder="Select Bowler"
+            handleChange={(val) => setBowler(val)}
           />
         </div>
-
+        <div className="wicket-type">
+          <TextField
+            id="standard-basic"
+            label="Penalty Runs"
+            type="number"
+            variant="filled"
+            value={penaltyRuns}
+            size="small"
+            onChange={(event) => {
+              setPenaltyRuns(parseInt(event.target.value || 0, 10));
+            }}
+          />
+        </div>
         <Button
           variant="contained"
           disabled={disableButton()}
           onClick={() =>
-            onClose({ striker, nonStriker, bowler, startLater: false })
+            onClose({
+              striker,
+              nonStriker,
+              bowler,
+              startLater: false,
+              penaltyRuns,
+            })
           }
           className="update-button"
         >
@@ -94,7 +145,7 @@ export default function NewInningsDialog(props) {
 
         <Button
           variant="outlined"
-          onClick={() => onClose({ startLater: true })}
+          onClick={() => onClose({ startLater: true, penaltyRuns })}
           className="update-button"
         >
           Later

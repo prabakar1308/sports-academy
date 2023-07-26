@@ -10,15 +10,24 @@ import Grid from "@mui/material/Grid";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
+import {
+  setDoc,
+  doc,
+  Timestamp,
+  addDoc,
+  collection,
+} from "firebase/firestore/lite";
 
+import { db } from "../../../../../database/firebase.db";
 import * as cricketActions from "../../../../../store/actions/cricket";
 import PlayerDialog from "../../player-dialog/PlayerDialog";
 import WicketDialog from "../wicket-dialog/WicketDialog";
 import NewInningsDialog from "../new-innings-dialog/NewInningsDialog";
 import EndMatchDialog from "../end-match-dialog/EndMatchDialog";
-import { omitProps } from "../../../utils";
+import { getNewPlayerDetails, omitProps } from "../../../utils";
 import { WICKET_TYPES } from "../../../constants";
 import "./BallActions.scss";
+import ConfirmationDialog from "../../../../../components/confirmation-dialog/ConfirmationDialog";
 
 // const ball = {
 //   ballNo: 1,
@@ -52,11 +61,15 @@ export default function BallActions({ overDetails }) {
   const [isBatsmenRetire, setIsBatsmenRetire] = React.useState(false);
   const [openNewInningsDialog, setOpenNewInningsDialog] = React.useState(false);
   const [endDialog, setEndDialog] = React.useState(false);
+  // const [endInningConfirm, setEndInningConfirm] = React.useState(false);
+  const [endMatchConfirm, setEndMatchConfirm] = React.useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
     scoreboardEntries,
+    matchDetails,
+    scoreboard,
     scoreboard: { isFirstInnings, firstInnings, secondInnings },
     matchDetails: {
       noBallAllowed,
@@ -85,6 +98,11 @@ export default function BallActions({ overDetails }) {
   const nonStrikerKey =
     batsmen1 && batsmen1.isStriker ? "batsmen2" : "batsmen1";
 
+  const battingTeam = isFirstInnings ? firstInnings.team : secondInnings.team;
+  const bowlingTeam = isFirstInnings ? secondInnings.team : firstInnings.team;
+  const inningsKey = isFirstInnings ? "firstInnings" : "secondInnings";
+  const innings2Key = isFirstInnings ? "secondInnings" : "firstInnings";
+
   React.useEffect(() => {
     const { ballNum, overNum, overBallNum } = overs;
     setBallNo(ballNum);
@@ -101,8 +119,8 @@ export default function BallActions({ overDetails }) {
   };
 
   const startNewInnings = (data) => {
+    setOpenNewInningsDialog(false);
     if (data) {
-      setOpenNewInningsDialog(false);
       // dispatch(
       //   cricketActions.updateCurrentBolwer({
       //     bowlerKey: isFirstInnings ? "firstInnings" : "secondInnings",
@@ -111,11 +129,52 @@ export default function BallActions({ overDetails }) {
       //     currentOver: over,
       //   })
       // );
-      dispatch(cricketActions.endInnings(data));
-    }
+      let { striker, nonStriker, bowler, startLater, penaltyRuns } = data;
+      // let striker, nonStriker, bowler = null;
+      if (!startLater) {
+        // const battingTeam = isFirstInnings
+        //   ? firstInnings.team
+        //   : secondInnings.team;
+        // const bowlingTeam = isFirstInnings
+        //   ? secondInnings.team
+        //   : firstInnings.team;
+        // const inningsKey = isFirstInnings ? "firstInnings" : "secondInnings";
+        // const innings2Key = isFirstInnings ? "secondInnings" : "firstInnings";
+        striker = getPlayerDetails(
+          striker,
+          secondInnings.team,
+          "secondInnings"
+        );
+        nonStriker = getPlayerDetails(
+          nonStriker,
+          secondInnings.team,
+          "secondInnings"
+        );
+        bowler = getPlayerDetails(bowler, firstInnings.team, "firstInnings");
+      }
+      dispatch(
+        cricketActions.endInnings({
+          startLater,
+          striker,
+          nonStriker,
+          bowler,
+          penaltyRuns,
+        })
+      );
+    } else dispatch(cricketActions.undoScoreboard());
   };
 
-  const handleClose = ({ value }) => {
+  const handleClose = ({ value, isNew }) => {
+    if (isNew) {
+      createPlayer(value);
+      const bowlerKey = isFirstInnings ? "secondInnings" : "firstInnings";
+      dispatch(
+        cricketActions.addCricketPlayer({
+          key: bowlerKey,
+          value: { ...value, isOut: null, isRetire: false },
+        })
+      );
+    }
     if (value) {
       setOpenDialog(false);
       dispatch(
@@ -129,20 +188,44 @@ export default function BallActions({ overDetails }) {
     }
   };
 
+  const getPlayerDetails = (player, team, inningsKey) => {
+    const updatedPlayer = player ? omitProps("title", player) : null;
+    if (updatedPlayer) {
+      if (updatedPlayer.id) return updatedPlayer;
+      else {
+        const newPlayer = getNewPlayerDetails(updatedPlayer.name, team.id);
+        createPlayer(newPlayer);
+        dispatch(
+          cricketActions.addCricketPlayer({
+            key: inningsKey,
+            value: newPlayer,
+          })
+        );
+        return newPlayer;
+      }
+    }
+    return updatedPlayer;
+  };
+
   const handleNewBatsmenClose = ({ wicketType, wicketHelpedBy, batsmen }) => {
     let newBatsmenStrike = true;
     if (playersPerTeam === wickets + 1) {
-      isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
+      // isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
+      isFirstInnings ? setOpenNewInningsDialog(true) : setEndMatchConfirm(true);
     }
     if (batsmen || wicketType || wicketHelpedBy) {
-      setBatsmenDialog(false);
+      // setBatsmenDialog(false);
       // const strikerKey = batsmen1 && batsmen1.isStriker ? "batsmen1" : "batsmen2";
       // const nonStrikerKey = batsmen1 && batsmen1.isStriker ? "batsmen2" : "batsmen1";
       const lastBallRun = balls.length > 0 ? balls[balls.length - 1].runs : 0;
+      const overLastBall =
+        balls.length > 0 ? balls[balls.length - 1].overLastBall : false;
       let batsmenKey =
-        wicketType && wicketType.value === WICKET_TYPES.RUNOUT_OTHER
+        (wicketType && wicketType.value === WICKET_TYPES.RUNOUT_OTHER) ||
+        overLastBall
           ? nonStrikerKey
           : strikerKey;
+      newBatsmenStrike = overLastBall ? false : true;
       if (runout && lastBallRun % 2 === 0) {
         if (wicketType && wicketType.value === WICKET_TYPES.RUNOUT) {
           batsmenKey = nonStrikerKey;
@@ -163,16 +246,21 @@ export default function BallActions({ overDetails }) {
       // console.log(playersPerTeam, wickets, playersPerTeam === wickets + 1);
       dispatch(
         cricketActions.updateNewBatsmen({
-          inningsKey: isFirstInnings ? "firstInnings" : "secondInnings",
-          innings2Key: isFirstInnings ? "secondInnings" : "firstInnings",
+          inningsKey,
+          innings2Key,
           batsmenKey,
-          newBatsmen: batsmen ? omitProps("value", batsmen) : null,
+          newBatsmen: getPlayerDetails(batsmen, battingTeam, inningsKey),
           wicketType,
-          wicketHelpedBy,
+          wicketHelpedBy: getPlayerDetails(
+            wicketHelpedBy,
+            bowlingTeam,
+            innings2Key
+          ),
           isBatsmenRetire,
           newBatsmenStrike,
         })
       );
+      setBatsmenDialog(false);
       setRunout(false);
     }
   };
@@ -208,8 +296,6 @@ export default function BallActions({ overDetails }) {
       })
     );
 
-    if (runs === "W" || runout) setBatsmenDialog(true);
-
     let overDetails = {
       ballNum: ballNo + 1,
       overNum: over,
@@ -241,12 +327,16 @@ export default function BallActions({ overDetails }) {
     const currInnTotalRuns = runs > 0 ? totalRuns + runs : totalRuns;
     if (overLastBall && totalOvers === overDetails.overNum) {
       // setOpenNewInningsDialog(true);
-      isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
+      // isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
+      isFirstInnings ? setOpenNewInningsDialog(true) : setEndMatchConfirm(true);
     } else if (!isFirstInnings && currInnTotalRuns > firstInnings.totalRuns) {
       setEndDialog(true);
-    } else if (overLastBall) {
-      setOpenDialog(true);
+    } else {
+      if (overLastBall) {
+        setOpenDialog(true);
+      }
     }
+    if (runs === "W" || runout) setBatsmenDialog(true);
     dispatch(cricketActions.mainOverDetails({ key: bKey, overs: overDetails }));
     resetCheckBoxes();
     // }
@@ -263,6 +353,18 @@ export default function BallActions({ overDetails }) {
         // nonStrikerKey: batsmen1 && batsmen1.isStriker ? "batsmen2" : "batsmen1",
       })
     );
+  };
+
+  // const handleEndInningConfirm = (val) => {
+  //   setEndInningConfirm(false);
+  //   if (val) setOpenNewInningsDialog(true);
+  //   else dispatch(cricketActions.undoScoreboard());
+  // };
+
+  const handleEndMatchConfirm = (val) => {
+    setEndMatchConfirm(false);
+    if (val) setEndDialog(true);
+    else dispatch(cricketActions.undoScoreboard());
   };
 
   const resetCheckBoxes = () => {
@@ -321,10 +423,19 @@ export default function BallActions({ overDetails }) {
                 <FormGroup
                   row
                   className="form-group-wrapper"
-                  sx={{ flexWrap: "wrap", gap: 1 }}
+                  sx={{
+                    flexWrap: "wrap",
+                    gap: 0.25,
+                    justifyContent: "center",
+                    paddingLeft: "25px",
+                  }}
+                  // justifyContent="center"
+                  // flexWrap={"wrap"}
+                  // useFlexGap
                 >
                   {wideAllowed && (
                     <FormControlLabel
+                      sx={{ width: "110px" }}
                       control={
                         <Checkbox
                           checked={wide}
@@ -332,7 +443,7 @@ export default function BallActions({ overDetails }) {
                             setWide(event.target.checked);
                           }}
                           color="secondary"
-                          disabled={noBall || byes || runout}
+                          disabled={noBall || byes}
                         />
                       }
                       label="Wide"
@@ -341,6 +452,7 @@ export default function BallActions({ overDetails }) {
 
                   {noBallAllowed && (
                     <FormControlLabel
+                      sx={{ width: "110px" }}
                       control={
                         <Checkbox
                           checked={noBall}
@@ -348,7 +460,7 @@ export default function BallActions({ overDetails }) {
                             setNoBall(event.target.checked);
                           }}
                           color="secondary"
-                          disabled={wide || runout}
+                          disabled={wide}
                         />
                       }
                       label="No Ball"
@@ -357,6 +469,7 @@ export default function BallActions({ overDetails }) {
 
                   {byesAllowed && (
                     <FormControlLabel
+                      sx={{ width: "110px" }}
                       control={
                         <Checkbox
                           checked={byes}
@@ -364,7 +477,7 @@ export default function BallActions({ overDetails }) {
                             setByes(event.target.checked);
                           }}
                           color="secondary"
-                          disabled={wide || runout}
+                          disabled={wide}
                         />
                       }
                       label="Byes"
@@ -372,6 +485,7 @@ export default function BallActions({ overDetails }) {
                   )}
 
                   <FormControlLabel
+                    sx={{ width: "110px" }}
                     control={
                       <Checkbox
                         checked={runout}
@@ -379,7 +493,7 @@ export default function BallActions({ overDetails }) {
                           setRunout(event.target.checked);
                         }}
                         color="secondary"
-                        disabled={noBall || byes || wide}
+                        // disabled={byes || wide}
                       />
                     }
                     label="Runout"
@@ -396,8 +510,9 @@ export default function BallActions({ overDetails }) {
                 sx={{ flexWrap: "wrap" }}
               >
                 {details &&
-                  details.map((det) => (
+                  details.map((det, index) => (
                     <Button
+                      key={`button-${index}`}
                       variant="text"
                       onClick={() => runAction(det)}
                       disabled={disableActions(det)}
@@ -424,8 +539,13 @@ export default function BallActions({ overDetails }) {
             <Grid item>
               <Stack
                 spacing={2}
-                direction={{ xs: "column", sm: "row" }}
-                sx={{ paddingTop: "16px" }}
+                direction={{ xs: "row", sm: "row" }}
+                flexWrap={"wrap"}
+                useFlexGap
+                alignItems={"center"}
+                justifyContent={"center"}
+                // sx={{ paddingTop: "16px" }}
+                className="button-wrapper"
               >
                 <Button
                   variant="contained"
@@ -435,6 +555,7 @@ export default function BallActions({ overDetails }) {
                     setIsBatsmenRetire(true);
                     dispatch(cricketActions.archiveScoreboard());
                   }}
+                  sx={{ width: "150px", paddingLeft: "16px" }}
                 >
                   Retire
                 </Button>
@@ -442,6 +563,7 @@ export default function BallActions({ overDetails }) {
                   variant="contained"
                   color="secondary"
                   onClick={swapBatsmen}
+                  sx={{ width: "150px" }}
                 >
                   Swap Batsmen
                 </Button>
@@ -450,8 +572,22 @@ export default function BallActions({ overDetails }) {
                   color="secondary"
                   onClick={() => dispatch(cricketActions.undoScoreboard())}
                   disabled={!(scoreboardEntries.length > 1)}
+                  sx={{ width: "150px" }}
                 >
                   Undo
+                </Button>
+
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => {
+                    updateMatch(scoreboard, matchDetails);
+                    dispatch(cricketActions.saveCricketMatch());
+                  }}
+                  disabled={!(scoreboardEntries.length > 1)}
+                  sx={{ width: "150px" }}
+                >
+                  Save
                 </Button>
                 {/* <Button variant="contained" color="secondary">
                 Others
@@ -470,11 +606,11 @@ export default function BallActions({ overDetails }) {
           open={openDialog}
           onClose={handleClose}
           title={"Select Bowler"}
-          currentBowler={currentBowler}
+          excludedPlayerId={currentBowler?.id}
           players={bowlingInnings?.players}
         />
       )}
-      {batsmenDialog && (
+      {batsmenDialog && !openDialog && (
         <WicketDialog
           team={innings?.team}
           open={batsmenDialog}
@@ -485,10 +621,13 @@ export default function BallActions({ overDetails }) {
           bowlers={bowlingInnings?.players}
           isBatsmenRetire={isBatsmenRetire}
           // + 2 - (current wicket + not out batsmen)
-          hideNewBatsmen={playersPerTeam === wickets + 1}
+          hideNewBatsmen={
+            playersPerTeam === wickets + 1 || openNewInningsDialog || endDialog
+          }
         />
       )}
-      {openNewInningsDialog && (
+      {/* to set wickets details first (!batsmenDialog) */}
+      {openNewInningsDialog && !batsmenDialog && (
         <NewInningsDialog
           open={openNewInningsDialog}
           onClose={startNewInnings}
@@ -500,7 +639,7 @@ export default function BallActions({ overDetails }) {
         />
       )}
 
-      {endDialog && !isFirstInnings && (
+      {endDialog && !batsmenDialog && !isFirstInnings && (
         <EndMatchDialog
           open={endDialog}
           onClose={endMatch}
@@ -512,6 +651,53 @@ export default function BallActions({ overDetails }) {
           allWickets={playersPerTeam === wickets + 1}
         />
       )}
+      {/* {endInningConfirm && (
+        <ConfirmationDialog
+          title={"Close Innings"}
+          actionBtnText={"Continue"}
+          cancelBtnText="Undo"
+          handleClose={handleEndInningConfirm}
+          confirmationText={
+            "Innings Completed! Click continue to start 2nd Innings"
+          }
+        />
+      )} */}
+      {endMatchConfirm && (
+        <ConfirmationDialog
+          title={"Close Match"}
+          actionBtnText={"Continue"}
+          cancelBtnText="Undo"
+          handleClose={handleEndMatchConfirm}
+          confirmationText={
+            "Match will be Completed! Click continue to close the match"
+          }
+        />
+      )}
     </div>
   );
 }
+
+const updateMatch = async (scoreboard, matchDetails) => {
+  try {
+    const client = JSON.parse(sessionStorage.getItem("client"));
+    const data = {
+      clientId: client ? client.clientId : 0,
+      matchId: scoreboard.matchId,
+      matchDetails,
+      scoreboard,
+      created: Timestamp.now(),
+    };
+    await setDoc(doc(db, "matches", scoreboard.matchId), data);
+  } catch (err) {
+    alert(err);
+  }
+};
+
+const createPlayer = async (player) => {
+  try {
+    console.log("player", player);
+    await setDoc(doc(db, "players", player.id), player);
+  } catch (err) {
+    alert(err);
+  }
+};

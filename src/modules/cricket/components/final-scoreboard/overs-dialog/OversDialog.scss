@@ -1,0 +1,24 @@
+.overs-dialog-wrapper {
+  padding-top: 25px;
+  .MuiBadge-root {
+    margin-left: 18px;
+  }
+
+  .MuiDivider-root {
+    margin: 10px 0;
+  }
+}
+
+.overs-dialog-app-bar {
+  .MuiPaper-root {
+    header {
+      background-color: cadetblue;
+    }
+  }
+  // .MuiDialog-container {
+  //   padding: 10px;
+  //   .MuiDialog-paper {
+  //     padding: 10px;
+  //   }
+  // }
+}

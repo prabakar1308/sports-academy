@@ -9,23 +9,24 @@ import { configureStore } from "@reduxjs/toolkit";
 import reducer from "./store/reducers";
 import { Provider } from "react-redux";
 // import { getDefaultMiddleware } from "@reduxjs/toolkit";
-// import createSagaMiddleware from "redux-saga";
-// import { rootSaga } from "./store/sagas";
+import createSagaMiddleware from "redux-saga";
+import { rootSaga } from "./store/sagas";
 
-// let sagaMiddleware = createSagaMiddleware();
-// const middleware = [sagaMiddleware];
+let sagaMiddleware = createSagaMiddleware();
+const middleware = [sagaMiddleware];
 
 const store = configureStore({
   reducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }),
+      immutableCheck: false,
+    }).concat(middleware),
   // middleware: (getDefaultMiddleware) =>
   //   getDefaultMiddleware().concat(middleware),
 });
 
-// sagaMiddleware.run(rootSaga);
+sagaMiddleware.run(rootSaga);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

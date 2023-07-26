@@ -31,7 +31,7 @@ export default function Scoreboard() {
 
   React.useEffect(() => {
     if (!isMatchStarted) {
-      navigate("/cricket/new-match");
+      navigate("/cricket");
     } else if (isMatchCompleted) {
       navigate("/cricket/finalscore");
     }
@@ -45,8 +45,22 @@ export default function Scoreboard() {
   //   }
   // }, [isFirstInnings]);
 
+  // function Prompt(props) {
+  //   const block = props.when;
+
+  //   useBlocker(() => {
+  //     if (block) {
+  //       return !window.confirm(props.message);
+  //     }
+  //     return false;
+  //   });
+
+  //   return <div key={block} />;
+  // }
+
   return (
     <div className="scoreboard-wrapper">
+      {/* <Prompt when={true} message="Are you sure you want to leave?" />; */}
       <Stack direction={"column"} spacing={2}>
         <MainScore />
         {(batsmen1 || batsmen2) && (

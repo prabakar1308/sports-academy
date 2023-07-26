@@ -26,14 +26,17 @@ import { db } from "../../../../database/firebase.db";
 import * as cricketActions from "../../../../store/actions/cricket";
 
 import {
+  doc,
   collection,
   addDoc,
+  deleteDoc,
   query,
   orderBy as fbOrderBy,
   onSnapshot,
   where,
 } from "firebase/firestore/lite";
 import { useNavigate } from "react-router-dom";
+import ConfirmationDialog from "../../../../components/confirmation-dialog/ConfirmationDialog";
 
 // function createData(team1, calories, fat, carbs, protein) {
 //   return {
@@ -98,19 +101,31 @@ const headCells = [
     id: "team1",
     numeric: false,
     disablePadding: true,
-    label: "Team 1",
+    label: "#1",
   },
   {
     id: "team2",
     numeric: false,
     disablePadding: true,
-    label: "Team 2",
+    label: "#2",
   },
   {
     id: "status",
     numeric: false,
     disablePadding: true,
-    label: "Match Status",
+    label: "Status",
+  },
+  {
+    id: "created",
+    numeric: false,
+    disablePadding: true,
+    label: "Date",
+  },
+  {
+    id: "deleteBtn",
+    numeric: false,
+    disablePadding: true,
+    label: "",
   },
   //   {
   //     id: "carbs",
@@ -257,12 +272,17 @@ export default function ViewMatchList() {
       scoreboard: { resultText },
       matchDetails: { team1, team2 },
       matchId,
+      created,
     } = mat;
     return {
       team1,
       team2,
       status: resultText ? resultText : "In Progress",
       matchId,
+      created: {
+        date: new Date(created.seconds * 1000).toLocaleDateString(),
+        time: new Date(created.seconds * 1000).toLocaleTimeString(),
+      },
     };
   });
   console.log("rows", rows);
@@ -272,6 +292,7 @@ export default function ViewMatchList() {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [currentMatchId, setCurrentMatchId] = React.useState("");
 
   React.useEffect(() => {
     // FB - get teams
@@ -356,6 +377,11 @@ export default function ViewMatchList() {
     [order, orderBy, page, rowsPerPage]
   );
 
+  const handleDelete = (res) => {
+    if (res) deleteMatch(currentMatchId);
+    setCurrentMatchId("");
+  };
+
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
@@ -401,6 +427,22 @@ export default function ViewMatchList() {
                     <TableCell align="left">{row.team1.name}</TableCell>
                     <TableCell align="left">{row.team2.name}</TableCell>
                     <TableCell align="left">{row.status}</TableCell>
+                    {/* <TableCell align="left">{row.created.date}</TableCell> */}
+                    <Tooltip title={row.created.time}>
+                      <TableCell align="left">{row.created.date}</TableCell>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <TableCell>
+                        <IconButton
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setCurrentMatchId(row.matchId);
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </Tooltip>
                     {/* <TableCell align="right">{row.protein}</TableCell> */}
                   </TableRow>
                 );
@@ -431,6 +473,22 @@ export default function ViewMatchList() {
         control={<Switch checked={dense} onChange={handleChangeDense} />}
         label="Dense padding"
       /> */}
+      {currentMatchId && (
+        <ConfirmationDialog
+          title={"Delete Match"}
+          actionBtnText={"Delete"}
+          handleClose={handleDelete}
+          confirmationText={"Do you really want to delete the match?"}
+        />
+      )}
     </Box>
   );
 }
+
+const deleteMatch = async (matchId) => {
+  try {
+    await deleteDoc(doc(db, "matches", matchId));
+  } catch (err) {
+    alert(err);
+  }
+};
