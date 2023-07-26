@@ -1,26 +1,26 @@
-import {
-  setDoc,
-  deleteDoc,
-  doc,
-  Timestamp,
-  WriteBatch,
-  writeBatch,
-} from "firebase/firestore/lite";
-import { db } from "../../database/firebase.db";
+// import {
+//   setDoc,
+//   deleteDoc,
+//   doc,
+//   Timestamp,
+//   WriteBatch,
+//   writeBatch,
+// } from "firebase/firestore/lite";
+// import { db } from "../../database/firebase.db";
 
-export const updatePlayersFirebase = async (players) => {
-  try {
-    const batch = writeBatch(db);
-    players.forEach((player) => {
-      setDoc(doc(db, "players", player.id), player);
-    });
-    // await setDoc(doc(db, "matches", scoreboard.matchId), data);
-    // Commit the batch
-    await batch.commit();
-  } catch (err) {
-    alert(err);
-  }
-};
+// export const updatePlayersFirebase = async (players) => {
+//   try {
+//     const batch = writeBatch(db);
+//     players.forEach((player) => {
+//       setDoc(doc(db, "players", player.id), player);
+//     });
+//     // await setDoc(doc(db, "matches", scoreboard.matchId), data);
+//     // Commit the batch
+//     await batch.commit();
+//   } catch (err) {
+//     alert(err);
+//   }
+// };
 
 // export const updatePlayersFB = (players) => {
 //   const playerIds = players.map(player => player.id);

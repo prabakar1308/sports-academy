@@ -1,17 +1,17 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
+// import Box from "@mui/material/Box";
+// import Paper from "@mui/material/Paper";
 import DialogTitle from "@mui/material/DialogTitle";
 import Dialog from "@mui/material/Dialog";
-import Avatar from "@mui/material/Avatar";
-import AddIcon from "@mui/icons-material/Add";
-import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import { Timestamp } from "firebase/firestore/lite";
-import { v4 as uuid } from "uuid";
+// import Avatar from "@mui/material/Avatar";
+// import AddIcon from "@mui/icons-material/Add";
+// import Stack from "@mui/material/Stack";
+// import TextField from "@mui/material/TextField";
+// import Button from "@mui/material/Button";
+// import { Timestamp } from "firebase/firestore/lite";
+// import { v4 as uuid } from "uuid";
 
 import "./PlayerDialog.scss";
 import { getNewPlayerDetails, omitProps } from "../../utils";

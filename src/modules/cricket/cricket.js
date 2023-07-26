@@ -8,17 +8,17 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ScoreboardIcon from "@mui/icons-material/Scoreboard";
-import { setDoc, deleteDoc, doc, Timestamp } from "firebase/firestore/lite";
+// import { setDoc, deleteDoc, doc, Timestamp } from "firebase/firestore/lite";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import ReactToPrint from "react-to-print";
 
 import CardComponent from "../../components/card/Card";
 import AvatarIcon from "../../components/avatar-icon/AvatarIcon";
-import { db } from "../../database/firebase.db";
+// import { db } from "../../database/firebase.db";
 import { getRequiredRunDetails } from "./utils";
 import "./cricket.scss";
 import * as cricketActions from "../../store/actions/cricket";
-import { updatePlayersFirebase } from "./db-operations";
+// import { updatePlayersFirebase } from "./db-operations";
 
 const Cricket = () => {
   const location = useLocation();
@@ -107,20 +107,34 @@ const Cricket = () => {
     if (scoreboardEntries.length > 1 && (!isFirstInnings || isMatchCompleted)) {
       // update match in db
       console.log("match updated in DB");
-      updateMatch(scoreboard, matchDetails);
+      // updateMatch(scoreboard, matchDetails);
+      dispatch(
+        cricketActions.saveCricketMatch({
+          scoreboard,
+          matchDetails,
+        })
+      );
 
       // update players in db
       if (isMatchCompleted) {
         const players = [...team1Players, ...team2Players];
-        updatePlayersFirebase(players);
+        // updatePlayersFirebase(players);
+        dispatch(cricketActions.updateMatchPlayers(players));
       }
     } else if (!isFirstInnings && unSavedActions) {
       // when first innings closed manually without balls bowled (set target as penalty runs)
-      updateMatch(scoreboard, matchDetails);
+      dispatch(
+        cricketActions.saveCricketMatch({
+          scoreboard,
+          matchDetails,
+        })
+      );
+      // updateMatch(scoreboard, matchDetails);
     } else if (isMatchCompleted && unSavedActions) {
       // when match closed manually after the save action
       const players = [...team1Players, ...team2Players];
-      updatePlayersFirebase(players);
+      // updatePlayersFirebase(players);
+      dispatch(cricketActions.updateMatchPlayers(players));
     }
   }, [isFirstInnings, isMatchCompleted]);
 
@@ -309,20 +323,20 @@ const Cricket = () => {
   );
 };
 
-const updateMatch = async (scoreboard, matchDetails) => {
-  try {
-    const client = JSON.parse(sessionStorage.getItem("client"));
-    const data = {
-      clientId: client ? client.clientId : 0,
-      matchId: scoreboard.matchId,
-      matchDetails,
-      scoreboard,
-      created: Timestamp.now(),
-    };
-    await setDoc(doc(db, "matches", scoreboard.matchId), data);
-  } catch (err) {
-    alert(err);
-  }
-};
+// const updateMatch = async (scoreboard, matchDetails) => {
+//   try {
+//     const client = JSON.parse(sessionStorage.getItem("client"));
+//     const data = {
+//       clientId: client ? client.clientId : 0,
+//       matchId: scoreboard.matchId,
+//       matchDetails,
+//       scoreboard,
+//       created: Timestamp.now(),
+//     };
+//     await setDoc(doc(db, "matches", scoreboard.matchId), data);
+//   } catch (err) {
+//     alert(err);
+//   }
+// };
 
 export default Cricket;

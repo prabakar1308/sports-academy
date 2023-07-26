@@ -1,40 +1,41 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { alpha } from "@mui/material/styles";
+// import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
+// import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
+// import TableSortLabel from "@mui/material/TableSortLabel";
+// import Toolbar from "@mui/material/Toolbar";
+// import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
+// import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
+// import FormControlLabel from "@mui/material/FormControlLabel";
+// import Switch from "@mui/material/Switch";
 import DeleteIcon from "@mui/icons-material/Delete";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import { visuallyHidden } from "@mui/utils";
+// import FilterListIcon from "@mui/icons-material/FilterList";
+// import { visuallyHidden } from "@mui/utils";
 import { useSelector, useDispatch } from "react-redux";
-import { db } from "../../../../database/firebase.db";
+// import { db } from "../../../../database/firebase.db";
 import * as cricketActions from "../../../../store/actions/cricket";
+import * as genericActions from "../../../../store/actions/dashboard";
 
-import {
-  doc,
-  collection,
-  addDoc,
-  deleteDoc,
-  query,
-  orderBy as fbOrderBy,
-  onSnapshot,
-  where,
-} from "firebase/firestore/lite";
+// import {
+//   doc,
+//   collection,
+//   addDoc,
+//   deleteDoc,
+//   query,
+//   orderBy as fbOrderBy,
+//   onSnapshot,
+//   where,
+// } from "firebase/firestore/lite";
 import { useNavigate } from "react-router-dom";
 import ConfirmationDialog from "../../../../components/confirmation-dialog/ConfirmationDialog";
 
@@ -280,8 +281,8 @@ export default function ViewMatchList() {
       status: resultText ? resultText : "In Progress",
       matchId,
       created: {
-        date: new Date(created.seconds * 1000).toLocaleDateString(),
-        time: new Date(created.seconds * 1000).toLocaleTimeString(),
+        date: new Date(created * 1000).toLocaleDateString(),
+        time: new Date(created * 1000).toLocaleTimeString(),
       },
     };
   });
@@ -295,20 +296,22 @@ export default function ViewMatchList() {
   const [currentMatchId, setCurrentMatchId] = React.useState("");
 
   React.useEffect(() => {
-    // FB - get teams
+    // FB - get matches
     const client = JSON.parse(sessionStorage.getItem("client"));
-    console.log("client", client);
-    const q = query(
-      collection(db, "matches"),
-      where("clientId", "==", client ? client.clientId : 0),
-      fbOrderBy("created", "desc")
-    );
-    // const q = query(collection(db, "teams"), orderBy("created", "desc"));
-    onSnapshot(q, (querySnapshot) => {
-      const data = querySnapshot.docs.map((doc) => doc.data());
-      console.log("matches", data);
-      dispatch(cricketActions.updateMatchList(data));
-    });
+    dispatch(genericActions.switchProgressLoader(true));
+    dispatch(cricketActions.getMatchList(client));
+    // console.log("client", client);
+    // const q = query(
+    //   collection(db, "matches"),
+    //   where("clientId", "==", client ? client.clientId : 0),
+    //   fbOrderBy("created", "desc")
+    // );
+    // // const q = query(collection(db, "teams"), orderBy("created", "desc"));
+    // onSnapshot(q, (querySnapshot) => {
+    //   const data = querySnapshot.docs.map((doc) => doc.data());
+    //   console.log("matches", data);
+    //   dispatch(cricketActions.updateMatchList(data));
+    // });
   }, []);
 
   //   const handleRequestSort = (event, property) => {
@@ -378,7 +381,10 @@ export default function ViewMatchList() {
   );
 
   const handleDelete = (res) => {
-    if (res) deleteMatch(currentMatchId);
+    if (res) dispatch(cricketActions.deleteCricketMatch(currentMatchId));
+
+    // deleteMatch(currentMatchId);
+
     setCurrentMatchId("");
   };
 
@@ -485,10 +491,10 @@ export default function ViewMatchList() {
   );
 }
 
-const deleteMatch = async (matchId) => {
-  try {
-    await deleteDoc(doc(db, "matches", matchId));
-  } catch (err) {
-    alert(err);
-  }
-};
+// const deleteMatch = async (matchId) => {
+//   try {
+//     await deleteDoc(doc(db, "matches", matchId));
+//   } catch (err) {
+//     alert(err);
+//   }
+// };
