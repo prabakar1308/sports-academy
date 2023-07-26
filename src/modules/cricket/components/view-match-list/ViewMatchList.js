@@ -24,6 +24,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useSelector, useDispatch } from "react-redux";
 // import { db } from "../../../../database/firebase.db";
 import * as cricketActions from "../../../../store/actions/cricket";
+import * as genericActions from "../../../../store/actions/dashboard";
 
 // import {
 //   doc,
@@ -297,6 +298,7 @@ export default function ViewMatchList() {
   React.useEffect(() => {
     // FB - get matches
     const client = JSON.parse(sessionStorage.getItem("client"));
+    dispatch(genericActions.switchProgressLoader(true));
     dispatch(cricketActions.getMatchList(client));
     // console.log("client", client);
     // const q = query(

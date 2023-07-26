@@ -1,7 +1,16 @@
-const dashboardReducer = (state = false, action) => {
+import * as genericActions from "../actions/dashboard";
+
+const initialState = {
+  progressLoader: false,
+};
+
+const dashboardReducer = (state = initialState, action) => {
   switch (action.type) {
-    case "SIGN_IN":
-      return !state;
+    case genericActions.SWITCH_LOADER:
+      return {
+        ...state,
+        progressLoader: action.payload,
+      };
     default:
       return state;
   }

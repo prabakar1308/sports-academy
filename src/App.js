@@ -23,6 +23,7 @@ import Scoreboard from "./modules/cricket/components/scoreboard/Scoreboard";
 import FinalScoreboard from "./modules/cricket/components/final-scoreboard/FinalScoreboard";
 import ViewMatchList from "./modules/cricket/components/view-match-list/ViewMatchList";
 import BottomNavigationMenu from "./components/bottom-navigation/BottomNavigation";
+import ProgressLoader from "./modules/dashboard/progress-loader/ProgressLoader";
 // import Login from "./components/login/Login";
 
 function App() {
@@ -97,6 +98,7 @@ function App() {
           Learn React
         </a>
       </header> */}
+      <ProgressLoader />
     </div>
   );
 }

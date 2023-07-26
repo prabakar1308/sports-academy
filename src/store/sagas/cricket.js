@@ -4,11 +4,13 @@ import axios from "axios";
 // import { Timestamp } from "firebase/firestore/lite";
 
 import * as cricketActions from "../actions/cricket";
+import * as genericActions from "../actions/dashboard";
 
 // set environment variables for api's
 
-const API = "https://nsa-academy-api-dev.onrender.com";
+// const API = "https://nsa-academy-api-dev.onrender.com";
 // const API = "http://localhost:3001";
+const API = process.env.REACT_APP_API_URL;
 
 function isEmpty(obj) {
   return Object.keys(obj).length === 0;
@@ -111,6 +113,7 @@ export function* getCricketMatchesSaga(action) {
     console.log("clientId", clientId);
     const res = yield axios.get(`${API}/cricket/matches/${clientId}`);
     yield put(cricketActions.getMatchListSuccess(res.data));
+    yield put(genericActions.switchProgressLoader(false));
   } catch (e) {
     // handle error
   }
