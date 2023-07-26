@@ -1,6 +1,10 @@
-export const FETCH_CRICKET_TEAMS = "[cricket] FETCH_CRICKET_TEAMS";
-// export const FETCH_CRICKET_TEAMS_SUCCESS = "FETCH_CRICKET_TEAMS_SUCCESS";
+export const GET_CRICKET_TEAMS = "[cricket] GET_CRICKET_TEAMS";
+export const FETCH_CRICKET_TEAMS_SUCCESS = "FETCH_CRICKET_TEAMS_SUCCESS";
 export const ADD_CRICKET_TEAM = "[cricket] ADD_CRICKET_TEAM";
+export const ADD_CRICKET_TEAM_SUCCESS = "[cricket] ADD_CRICKET_TEAM_SUCCESS";
+export const CREATE_PLAYER_BEFORE_START =
+  "[cricket] CREATE_PLAYER_BEFORE_START";
+export const GET_PLAYERS_BY_TEAM = "[cricket] GET_PLAYERS_BY_TEAM";
 
 export const UPDATE_MATCH_DETAILS = "[cricket] UPDATE_MATCH_DETAILS";
 export const UPDATE_CRICKET_FIELDS = "[cricket] UPDATE_CRICKET_FIELDS";
@@ -12,35 +16,71 @@ export const ADD_BALL = "[cricket] ADD_BALL";
 // to keep the updated values when switching btw scoreboard
 export const MAINTAIN_OVER_DETAILS = "[cricket] MAINTAIN_OVER_DETAILS";
 export const ADD_CRICKET_PLAYER = "[cricket] ADD_CRICKET_PLAYER";
+export const ADD_CRICKET_PLAYER_SUCCESS =
+  "[cricket] ADD_CRICKET_PLAYER_SUCCESS";
 export const SWITCH_STRIKER = "[cricket] SWITCH_STRIKER";
 export const UNDO_SCOREBOARD = "[cricket] UNDO_SCOREBOARD";
 export const ARCHIVE_SCOREBOARD = "[cricket] ARCHIVE_SCOREBOARD";
 export const END_INNINGS = "[cricket] END_INNINGS";
 export const END_MATCH = "[cricket] END_MATCH";
-export const UPDATE_MATCH_LIST = "[cricket] UPDATE_MATCH_LIST";
+// export const UPDATE_MATCH_LIST = "[cricket] UPDATE_MATCH_LIST";
+export const GET_MATCH_LIST = "[cricket] GET_MATCH_LIST";
+export const GET_MATCH_LIST_SUCCESS = "[cricket] GET_MATCH_LIST_SUCCESS";
 export const SET_MATCH_DETAILS = "[cricket] SET_MATCH_DETAILS";
-export const UPDATE_PLAYER_SCORE = "[cricket] UPDATE_PLAYER_SCORE";
 export const RESET_MATCH_DETAILS = "[cricket] RESET_MATCH_DETAILS";
-export const SAVE_MATCH = "[cricket] SAVE_MATCH";
+export const SAVE_CRICKET_MATCH = "[cricket] SAVE_CRICKET_MATCH";
+export const SAVE_CRICKET_MATCH_SUCCESS =
+  "[cricket] SAVE_CRICKET_MATCH_SUCCESS";
+export const UPDATE_MATCH_PLAYERS = "[cricket] UPDATE_MATCH_PLAYERS";
+export const DELETE_MATCH = "[cricket] DELETE_MATCH";
+export const DELETE_MATCH_SUCCESS = "[cricket] DELETE_MATCH_SUCCESS";
 
 export const getCricketTeams = (teams) => {
   return {
-    type: FETCH_CRICKET_TEAMS,
+    type: GET_CRICKET_TEAMS,
     payload: teams,
   };
 };
 
-// export const getCricketTeamsSuccess = (teams) => {
-//   return {
-//     type: FETCH_CRICKET_TEAMS_SUCCESS,
-//     payload: teams,
-//   };
-// };
+export const getCricketTeamsSuccess = (teams) => {
+  return {
+    type: FETCH_CRICKET_TEAMS_SUCCESS,
+    payload: teams,
+  };
+};
+
+export const getPlayersByTeam = (data) => {
+  return {
+    type: GET_PLAYERS_BY_TEAM,
+    payload: data,
+  };
+};
 
 export const addCricketTeam = (team) => {
   return {
     type: ADD_CRICKET_TEAM,
     payload: team,
+  };
+};
+
+export const addCricketTeamSuccess = (team) => {
+  return {
+    type: ADD_CRICKET_TEAM_SUCCESS,
+    payload: team,
+  };
+};
+
+export const createPlayerBeforeStart = (data) => {
+  return {
+    type: CREATE_PLAYER_BEFORE_START,
+    payload: data,
+  };
+};
+
+export const saveCricketMatch = (data) => {
+  return {
+    type: SAVE_CRICKET_MATCH,
+    payload: data,
   };
 };
 
@@ -107,6 +147,13 @@ export const addCricketPlayer = (data) => {
   };
 };
 
+export const addCricketPlayerSuccess = (data) => {
+  return {
+    type: ADD_CRICKET_PLAYER_SUCCESS,
+    payload: data,
+  };
+};
+
 export const switchStriker = (data) => {
   return {
     type: SWITCH_STRIKER,
@@ -140,9 +187,23 @@ export const endCricketMatch = (data) => {
   };
 };
 
-export const updateMatchList = (data) => {
+// export const updateMatchList = (data) => {
+//   return {
+//     type: UPDATE_MATCH_LIST,
+//     payload: data,
+//   };
+// };
+
+export const getMatchList = (data) => {
   return {
-    type: UPDATE_MATCH_LIST,
+    type: GET_MATCH_LIST,
+    payload: data,
+  };
+};
+
+export const getMatchListSuccess = (data) => {
+  return {
+    type: GET_MATCH_LIST_SUCCESS,
     payload: data,
   };
 };
@@ -160,15 +221,28 @@ export const resetMatchDetails = () => {
   };
 };
 
-export const updatePlayerScore = (data) => {
+export const updateMatchPlayers = (data) => {
   return {
-    type: UPDATE_PLAYER_SCORE,
+    type: UPDATE_MATCH_PLAYERS,
     payload: data,
   };
 };
 
-export const saveCricketMatch = () => {
+export const saveCricketMatchSuccess = () => {
   return {
-    type: SAVE_MATCH,
+    type: SAVE_CRICKET_MATCH_SUCCESS,
+  };
+};
+
+export const deleteCricketMatch = (data) => {
+  return {
+    type: DELETE_MATCH,
+    payload: data,
+  };
+};
+
+export const deleteCricketMatchSuccess = (data) => {
+  return {
+    type: DELETE_MATCH_SUCCESS,
   };
 };

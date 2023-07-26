@@ -10,15 +10,15 @@ import Grid from "@mui/material/Grid";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import {
-  setDoc,
-  doc,
-  Timestamp,
-  addDoc,
-  collection,
-} from "firebase/firestore/lite";
+// import {
+//   setDoc,
+//   doc,
+//   Timestamp,
+//   addDoc,
+//   collection,
+// } from "firebase/firestore/lite";
 
-import { db } from "../../../../../database/firebase.db";
+// import { db } from "../../../../../database/firebase.db";
 import * as cricketActions from "../../../../../store/actions/cricket";
 import PlayerDialog from "../../player-dialog/PlayerDialog";
 import WicketDialog from "../wicket-dialog/WicketDialog";
@@ -166,12 +166,13 @@ export default function BallActions({ overDetails }) {
 
   const handleClose = ({ value, isNew }) => {
     if (isNew) {
-      createPlayer(value);
+      // createPlayer(value);
       const bowlerKey = isFirstInnings ? "secondInnings" : "firstInnings";
       dispatch(
         cricketActions.addCricketPlayer({
           key: bowlerKey,
-          value: { ...value, isOut: null, isRetire: false },
+          value,
+          // value: { ...value, isOut: null, isRetire: false },
         })
       );
     }
@@ -194,7 +195,7 @@ export default function BallActions({ overDetails }) {
       if (updatedPlayer.id) return updatedPlayer;
       else {
         const newPlayer = getNewPlayerDetails(updatedPlayer.name, team.id);
-        createPlayer(newPlayer);
+        // createPlayer(newPlayer);
         dispatch(
           cricketActions.addCricketPlayer({
             key: inningsKey,
@@ -581,8 +582,15 @@ export default function BallActions({ overDetails }) {
                   variant="contained"
                   color="secondary"
                   onClick={() => {
-                    updateMatch(scoreboard, matchDetails);
-                    dispatch(cricketActions.saveCricketMatch());
+                    dispatch(
+                      cricketActions.saveCricketMatch({
+                        scoreboard,
+                        matchDetails,
+                        saveAction: true,
+                      })
+                    );
+                    // updateMatch(scoreboard, matchDetails);
+                    // dispatch(cricketActions.saveCricketMatchSuccess());
                   }}
                   disabled={!(scoreboardEntries.length > 1)}
                   sx={{ width: "150px" }}
@@ -677,27 +685,27 @@ export default function BallActions({ overDetails }) {
   );
 }
 
-const updateMatch = async (scoreboard, matchDetails) => {
-  try {
-    const client = JSON.parse(sessionStorage.getItem("client"));
-    const data = {
-      clientId: client ? client.clientId : 0,
-      matchId: scoreboard.matchId,
-      matchDetails,
-      scoreboard,
-      created: Timestamp.now(),
-    };
-    await setDoc(doc(db, "matches", scoreboard.matchId), data);
-  } catch (err) {
-    alert(err);
-  }
-};
+// const updateMatch = async (scoreboard, matchDetails) => {
+//   try {
+//     const client = JSON.parse(sessionStorage.getItem("client"));
+//     const data = {
+//       clientId: client ? client.clientId : 0,
+//       matchId: scoreboard.matchId,
+//       matchDetails,
+//       scoreboard,
+//       created: Timestamp.now(),
+//     };
+//     await setDoc(doc(db, "matches", scoreboard.matchId), data);
+//   } catch (err) {
+//     alert(err);
+//   }
+// };
 
-const createPlayer = async (player) => {
-  try {
-    console.log("player", player);
-    await setDoc(doc(db, "players", player.id), player);
-  } catch (err) {
-    alert(err);
-  }
-};
+// const createPlayer = async (player) => {
+//   try {
+//     console.log("player", player);
+//     await setDoc(doc(db, "players", player.id), player);
+//   } catch (err) {
+//     alert(err);
+//   }
+// };

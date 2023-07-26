@@ -1,4 +1,4 @@
-import { Timestamp } from "firebase/firestore/lite";
+// import { Timestamp } from "firebase/firestore/lite";
 import Badge from "@mui/material/Badge";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
@@ -52,7 +52,7 @@ export const getNewPlayerDetails = (name, teamId) => {
     name,
     teamId,
     isActive: true,
-    created: Timestamp.now(),
+    created: Date.parse(new Date()) / 1000,
     matches: 0,
     battingInnings: 0,
     bowlingInnings: 0,

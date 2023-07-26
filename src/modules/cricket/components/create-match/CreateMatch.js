@@ -7,18 +7,18 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import TextField from "@mui/material/TextField";
-import {
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  where,
-} from "firebase/firestore/lite";
+// import {
+//   collection,
+//   addDoc,
+//   query,
+//   orderBy,
+//   onSnapshot,
+//   where,
+// } from "firebase/firestore/lite";
 
 import ModalDialog from "../../../../components/dialog/Dialog";
 import MatchToss from "../match-toss/MatchToss";
-import { db } from "../../../../database/firebase.db";
+// import { db } from "../../../../database/firebase.db";
 import * as cricketActions from "../../../../store/actions/cricket";
 import { setPlayerForCurrentMatch } from "../../utils";
 
@@ -39,16 +39,17 @@ const CreateMatch = () => {
   React.useEffect(() => {
     // FB - get teams
     const client = JSON.parse(sessionStorage.getItem("client"));
-    const q = query(
-      collection(db, "teams"),
-      where("clientId", "==", client ? client.clientId : 0),
-      orderBy("created", "desc")
-    );
-    // const q = query(collection(db, "teams"), orderBy("created", "desc"));
-    onSnapshot(q, (querySnapshot) => {
-      const data = querySnapshot.docs.map((doc) => doc.data());
-      dispatch(cricketActions.getCricketTeams(data));
-    });
+    dispatch(cricketActions.getCricketTeams(client));
+    // const q = query(
+    //   collection(db, "teams"),
+    //   where("clientId", "==", client ? client.clientId : 0),
+    //   orderBy("created", "desc")
+    // );
+    // // const q = query(collection(db, "teams"), orderBy("created", "desc"));
+    // onSnapshot(q, (querySnapshot) => {
+    //   const data = querySnapshot.docs.map((doc) => doc.data());
+    //   dispatch(cricketActions.getCricketTeams(data));
+    // });
   }, []);
 
   React.useEffect(() => {
@@ -70,7 +71,7 @@ const CreateMatch = () => {
     console.log("{ isNew, value }", { isNew, value });
     if (value) {
       if (isNew) {
-        createTeam(value);
+        // createTeam(value);
         dispatch(cricketActions.addCricketTeam(value));
       } else if (value) {
         getPlayers(value, isFirst);
@@ -124,45 +125,38 @@ const CreateMatch = () => {
 
   // firebase
 
-  const createTeam = async (team) => {
-    try {
-      // FB - create team
-      await addDoc(collection(db, "teams"), team);
-    } catch (err) {
-      alert(err);
-    }
-  };
+  // const createTeam = async (team) => {
+  //   try {
+  //     // FB - create team
+  //     await addDoc(collection(db, "teams"), team);
+  //   } catch (err) {
+  //     alert(err);
+  //   }
+  // };
 
   const getPlayers = async (team, isFirst) => {
-    // import { doc, where, getDocs } from "firebase/firestore";
-
-    // const teamIdRef = doc(db, "teams", teamId);
-
-    // const q = query(collection(db, "players"), where("teamId", "==", teamIdRef));
-
-    // const files = await getDocs(q);
-    // console.log("players", files);
     const key = isFirst ? "team1Players" : "team2Players";
     const teamKey = isFirst ? "team1" : "team2";
-    const q = query(
-      collection(db, "players"),
-      where("teamId", "==", team.id),
-      orderBy("created", "desc")
-    );
-    console.log("sdfsssssssssssssssssssssssssssssssssssssssss");
-    onSnapshot(q, (querySnapshot) => {
-      const value = querySnapshot.docs.map((doc) => doc.data());
-      // dispatch(cricketActions.updateCricketFields({ key, value }));
-      // const updatedPlayers = setPlayerForCurrentMatch(value);
-      dispatch(
-        cricketActions.updateMatchDetails({
-          [key]: value,
-          [teamKey]: team,
-        })
-      );
-      // dispatch(cricketActions.updateCricketFields({ key, value }));
-      // console.log("players", { key, value });
-    });
+    dispatch(cricketActions.getPlayersByTeam({ key, teamKey, team }));
+    // const q = query(
+    //   collection(db, "players"),
+    //   where("teamId", "==", team.id),
+    //   orderBy("created", "desc")
+    // );
+    // console.log("sdfsssssssssssssssssssssssssssssssssssssssss");
+    // onSnapshot(q, (querySnapshot) => {
+    //   const value = querySnapshot.docs.map((doc) => doc.data());
+    //   // dispatch(cricketActions.updateCricketFields({ key, value }));
+    //   // const updatedPlayers = setPlayerForCurrentMatch(value);
+    //   dispatch(
+    //     cricketActions.updateMatchDetails({
+    //       [key]: value,
+    //       [teamKey]: team,
+    //     })
+    //   );
+    //   // dispatch(cricketActions.updateCricketFields({ key, value }));
+    //   // console.log("players", { key, value });
+    // });
   };
 
   return (

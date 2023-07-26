@@ -58,7 +58,7 @@ export default function ModalDialog(props) {
         name,
         area,
         isActive: true,
-        created: Timestamp.now(),
+        created: Date.parse(new Date()) / 1000,
         clientId: client ? client.clientId : 0,
       },
     });

@@ -11,9 +11,9 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { v4 as uuid } from "uuid";
-import { Timestamp } from "firebase/firestore/lite";
+// import { Timestamp } from "firebase/firestore/lite";
 
-import { db } from "../../../../database/firebase.db";
+// import { db } from "../../../../database/firebase.db";
 import {
   collection,
   addDoc,
@@ -46,7 +46,12 @@ const AdvancedSettings = () => {
     matchDetails,
     scoreboard,
     matchDetails: { team1, team2, team1Players, team2Players, battingFirst },
+    scoreboard: { isMatchStarted },
   } = useSelector((state) => state.cricket);
+
+  React.useEffect(() => {
+    if (isMatchStarted) navigate("/cricket/scoreboard");
+  }, [isMatchStarted]);
 
   React.useEffect(() => {
     const {
@@ -75,7 +80,7 @@ const AdvancedSettings = () => {
 
   const handleClose = ({ isNew, value }) => {
     if (isNew) {
-      createPlayer(value);
+      // createPlayer(value);
       const values = {
         striker,
         nonStriker,
@@ -90,11 +95,22 @@ const AdvancedSettings = () => {
       const teamPlayerKey =
         playerType === "openingBowler" ? "team2Players" : "team1Players";
 
+      // dispatch(
+      //   cricketActions.updateMatchDetails({
+      //     ...values,
+      //     [playerType]: value,
+      //     [teamPlayerKey]: [...players, value],
+      //   })
+      // );
+
       dispatch(
-        cricketActions.updateMatchDetails({
-          ...values,
-          [playerType]: value,
-          [teamPlayerKey]: [...players, value],
+        cricketActions.createPlayerBeforeStart({
+          apiData: value,
+          actionData: {
+            ...values,
+            [playerType]: value,
+            [teamPlayerKey]: [...players, value],
+          },
         })
       );
       // dispatch(
@@ -204,10 +220,16 @@ const AdvancedSettings = () => {
           extras: 0,
         },
       };
-      dispatch(cricketActions.updateScoreboardFields(fields));
-      createMatch(scoreboard, matchDetails, fields);
-    }
-    navigate(path);
+      // dispatch(cricketActions.updateScoreboardFields(fields));
+      // createMatch(scoreboard, matchDetails, fields);
+      dispatch(
+        cricketActions.saveCricketMatch({
+          scoreboard,
+          matchDetails,
+          fields,
+        })
+      );
+    } else navigate(path);
   };
 
   const isFirstTeam = () => {
@@ -369,31 +391,31 @@ const AdvancedSettings = () => {
   );
 };
 
-const createPlayer = async (player) => {
-  try {
-    await setDoc(doc(db, "players", player.id), player);
-  } catch (err) {
-    alert(err);
-  }
-};
+// const createPlayer = async (player) => {
+//   try {
+//     await setDoc(doc(db, "players", player.id), player);
+//   } catch (err) {
+//     alert(err);
+//   }
+// };
 
-const createMatch = async (scoreboard, matchDetails, fields) => {
-  try {
-    const client = JSON.parse(sessionStorage.getItem("client"));
-    const data = {
-      clientId: client ? client.clientId : 0,
-      matchId: fields.matchId,
-      matchDetails,
-      scoreboard: {
-        ...scoreboard,
-        ...fields,
-      },
-      created: Timestamp.now(),
-    };
-    await setDoc(doc(db, "matches", fields.matchId), data);
-  } catch (err) {
-    alert(err);
-  }
-};
+// const createMatch = async (scoreboard, matchDetails, fields) => {
+//   try {
+//     const client = JSON.parse(sessionStorage.getItem("client"));
+//     const data = {
+//       clientId: client ? client.clientId : 0,
+//       matchId: fields.matchId,
+//       matchDetails,
+//       scoreboard: {
+//         ...scoreboard,
+//         ...fields,
+//       },
+//       created: Timestamp.now(),
+//     };
+//     await setDoc(doc(db, "matches", fields.matchId), data);
+//   } catch (err) {
+//     alert(err);
+//   }
+// };
 
 export default AdvancedSettings;

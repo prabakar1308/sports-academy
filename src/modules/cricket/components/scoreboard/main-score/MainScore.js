@@ -8,15 +8,15 @@ import Typography from "@mui/material/Typography";
 import ScoreboardIcon from "@mui/icons-material/Scoreboard";
 import BlockIcon from "@mui/icons-material/Block";
 import StartIcon from "@mui/icons-material/Start";
-import {
-  setDoc,
-  doc,
-  Timestamp,
-  addDoc,
-  collection,
-} from "firebase/firestore/lite";
+// import {
+//   setDoc,
+//   doc,
+//   Timestamp,
+//   addDoc,
+//   collection,
+// } from "firebase/firestore/lite";
 
-import { db } from "../../../../../database/firebase.db";
+// import { db } from "../../../../../database/firebase.db";
 import * as cricketActions from "../../../../../store/actions/cricket";
 import NewInningsDialog from "../new-innings-dialog/NewInningsDialog";
 import AvatarIcon from "../../../../../components/avatar-icon/AvatarIcon";
@@ -71,7 +71,7 @@ export default function MainScore() {
       if (updatedPlayer.id) return updatedPlayer;
       else {
         const newPlayer = getNewPlayerDetails(updatedPlayer.name, team.id);
-        createPlayer(newPlayer);
+        // createPlayer(newPlayer);
         dispatch(
           cricketActions.addCricketPlayer({
             key: inningsKey,
@@ -203,10 +203,10 @@ export default function MainScore() {
   );
 }
 
-const createPlayer = async (player) => {
-  try {
-    await setDoc(doc(db, "players", player.id), player);
-  } catch (err) {
-    alert(err);
-  }
-};
+// const createPlayer = async (player) => {
+//   try {
+//     await setDoc(doc(db, "players", player.id), player);
+//   } catch (err) {
+//     alert(err);
+//   }
+// };

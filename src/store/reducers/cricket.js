@@ -118,7 +118,7 @@ const initialState = {
 
 const cricketReducer = (state = initialState, action) => {
   switch (action.type) {
-    case cricketActions.UPDATE_MATCH_LIST:
+    case cricketActions.GET_MATCH_LIST_SUCCESS:
       return {
         ...state,
         matches: action.payload,
@@ -136,22 +136,25 @@ const cricketReducer = (state = initialState, action) => {
         ...details,
       };
     }
-    case cricketActions.FETCH_CRICKET_TEAMS:
+    case cricketActions.FETCH_CRICKET_TEAMS_SUCCESS:
       return {
         ...state,
         teams: action.payload,
       };
-    case cricketActions.ADD_CRICKET_TEAM:
+    case cricketActions.ADD_CRICKET_TEAM_SUCCESS:
       return {
         ...state,
         teams: [...state.teams, action.payload],
       };
-    case cricketActions.ADD_CRICKET_PLAYER: {
+    case cricketActions.ADD_CRICKET_PLAYER_SUCCESS: {
       const { key, value } = action.payload;
       const innings = {
         ...state.scoreboard[key],
       };
-      const players = [...innings.players, { ...value, isOut: null }];
+      const players = [
+        ...innings.players,
+        { ...value, isOut: null, isRetire: false },
+      ];
       return {
         ...state,
         scoreboard: {
@@ -704,16 +707,17 @@ const cricketReducer = (state = initialState, action) => {
         unSavedActions,
       };
     }
-    case cricketActions.SAVE_MATCH: {
+    case cricketActions.SAVE_CRICKET_MATCH_SUCCESS: {
       const entries = [...state.scoreboardEntries];
       if (entries.length > 1) {
         return { ...state, scoreboardEntries: [entries[entries.length - 1]] };
       }
       return state;
     }
-    case cricketActions.UPDATE_PLAYER_SCORE: {
-      const { matchDetails } = action.payload;
-      return state;
+    case cricketActions.DELETE_MATCH_SUCCESS: {
+      const matchId = action.payload;
+      const matches = [...state.matches].filter((mat) => mat.id !== matchId);
+      return { ...state, matches };
     }
     default:
       return state;
