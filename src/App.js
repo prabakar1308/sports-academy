@@ -32,6 +32,8 @@ import * as genericActions from "./store/actions/dashboard";
 import ClientRegistration from "./modules/dashboard/register/Register";
 import LoginPage from "./modules/dashboard/login/Login";
 import LogoutPage from "./modules/dashboard/logout/Logout";
+import PlayersHome from "./modules/cricket/components/players/Player";
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
   const location = useLocation();
@@ -94,6 +96,7 @@ function App() {
             <Route path="settings" element={<AdvancedSettings />} />
             <Route path="scoreboard" element={<Scoreboard />} />
             <Route path="finalscore" element={<FinalScoreboard />} />
+            <Route path="players" element={<PlayersHome />} />
           </Route>
           <Route path="shuttle" element={<Shuttle />} />
           <Route path="booking" element={<Booking />} />

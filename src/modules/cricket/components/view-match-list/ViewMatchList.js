@@ -266,6 +266,10 @@ EnhancedTableHead.propTypes = {
 
 export default function ViewMatchList() {
   const { matches } = useSelector((state) => state.cricket);
+  const {
+    roles: { isSuperAdmin, isAdmin },
+  } = useSelector((state) => state.dashboard);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -333,7 +337,9 @@ export default function ViewMatchList() {
   const handleClick = (event, matchId) => {
     console.log(event, matchId);
     dispatch(cricketActions.setMatchDetails(matchId));
-    navigate("/cricket/scoreboard");
+    isSuperAdmin || isAdmin
+      ? navigate("/cricket/scoreboard")
+      : navigate("/cricket/finalscore");
     // const selectedIndex = selected.indexOf(name);
     // let newSelected = [];
 

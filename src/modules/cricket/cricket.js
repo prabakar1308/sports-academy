@@ -42,6 +42,10 @@ const Cricket = () => {
     unSavedActions,
   } = useSelector((state) => state.cricket);
 
+  const {
+    roles: { isSuperAdmin, isAdmin },
+  } = useSelector((state) => state.dashboard);
+
   const { totalRuns, team, totalBalls, players: players1 } = firstInnings;
   const {
     totalRuns: totalRuns2,
@@ -62,14 +66,15 @@ const Cricket = () => {
     bowlingBalls: currentBowler ? currentBowler.bowlingBalls : 0,
   });
 
+  const createMatch = {
+    title: "New League Match",
+    description: "Manages scoreboard",
+    image: require("../../images/cricket.jpg"),
+    link: "/cricket/new-match",
+    handleClick: () => dispatch(cricketActions.resetMatchDetails()),
+  };
+
   const cardList = [
-    {
-      title: "New League Match",
-      description: "Manages scoreboard",
-      image: require("../../images/cricket.jpg"),
-      link: "/cricket/new-match",
-      handleClick: () => dispatch(cricketActions.resetMatchDetails()),
-    },
     {
       title: "View Matches",
       description: "View the list of matches played",
@@ -81,9 +86,13 @@ const Cricket = () => {
       title: "View Players",
       description: "View player profile",
       image: require("../../images/cricket-teams.jpg"),
-      link: "/cricket/new-match",
+      link: "/cricket/players",
     },
   ];
+
+  if (isSuperAdmin || isAdmin) {
+    cardList.unshift(createMatch);
+  }
 
   React.useEffect(() => {
     // move to clients list page if client is not selected by super admin
@@ -265,7 +274,7 @@ const Cricket = () => {
               />
             )} */}
 
-            {!isMatchCompleted && (
+            {!isMatchCompleted && (isSuperAdmin || isAdmin) && (
               <ListItemAvatar>
                 <AvatarIcon
                   icon={<ScoreboardIcon />}
