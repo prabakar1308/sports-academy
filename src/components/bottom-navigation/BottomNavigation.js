@@ -12,6 +12,7 @@ import ConfirmationDialog from "../confirmation-dialog/ConfirmationDialog";
 export default function BottomNavigationMenu({
   navigationItems,
   unSavedChanges,
+  currentPath,
 }) {
   const [value, setValue] = React.useState(navigationItems[0]);
   const [confirm, setConfirm] = React.useState(null);
@@ -28,6 +29,7 @@ export default function BottomNavigationMenu({
         showLabels
         value={value}
         onChange={(event, newValue) => {
+          sessionStorage.setItem("previousPath", currentPath);
           console.log(newValue);
           setValue(newValue);
           if (unSavedChanges) setConfirm(newValue.path);

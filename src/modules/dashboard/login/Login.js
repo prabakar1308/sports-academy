@@ -12,6 +12,9 @@ import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import * as genericActions from "../../../store/actions/dashboard";
 
 function Copyright(props) {
   return (
@@ -35,15 +38,40 @@ function Copyright(props) {
 
 const defaultTheme = createTheme();
 
-export default function Login() {
-  const image1 = require("../../images/Virat.jpg");
+export default function LoginPage({ handleLogin }) {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [pin, setPin] = React.useState("");
+  const [disableBtn, setDisableBtn] = React.useState(false);
+  const {
+    loginStatus: { success, fail },
+    roles: { isSuperAdmin },
+  } = useSelector((state) => state.dashboard);
+
+  React.useEffect(() => {
+    if (success) {
+      isSuperAdmin ? navigate("/") : navigate("/cricket");
+    }
+  }, [success]);
+
+  React.useEffect(() => {
+    if (fail) {
+      setDisableBtn(true);
+    }
+  }, [fail]);
+
+  // React.useEffect(() => {
+  //   const userDetails = sessionStorage.getItem("userDetails");
+  //   if (userDetails) {
+  //     dispatch(genericActions.validateLoginSuccess(JSON.parse(userDetails)));
+  //   }
+  // }, []);
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    // const data = new FormData(event.currentTarget);
+    // handleLogin(data.get("pin"));
+    dispatch(genericActions.validateLogin(pin));
   };
 
   return (
@@ -91,6 +119,30 @@ export default function Login() {
               sx={{ mt: 1 }}
             >
               <TextField
+                value={pin}
+                type="number"
+                margin="normal"
+                required
+                fullWidth
+                id="pin"
+                label="Enter a pin"
+                name="pin"
+                error={fail && disableBtn}
+                helperText={
+                  fail && disableBtn
+                    ? "Invalid Pin. Please check with admin!"
+                    : ""
+                }
+                // autoComplete="email"
+                autoFocus
+                onChange={(event) => {
+                  setDisableBtn(true);
+                  setPin(event.target.value);
+                  if (event.target.value.trim().length > 0)
+                    setDisableBtn(false);
+                }}
+              />
+              {/* <TextField
                 margin="normal"
                 required
                 fullWidth
@@ -109,12 +161,13 @@ export default function Login() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-              />
-              <FormControlLabel
+              /> */}
+              {/* <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
                 label="Remember me"
-              />
+              /> */}
               <Button
+                disabled={disableBtn}
                 type="submit"
                 fullWidth
                 variant="contained"
@@ -123,13 +176,13 @@ export default function Login() {
                 Sign In
               </Button>
               <Grid container>
-                <Grid item xs>
+                {/* <Grid item xs>
                   <Link href="#" variant="body2">
                     Forgot password?
                   </Link>
-                </Grid>
+                </Grid> */}
                 <Grid item>
-                  <Link href="#" variant="body2">
+                  <Link href="/register" variant="body2">
                     {"Don't have an account? Sign Up"}
                   </Link>
                 </Grid>

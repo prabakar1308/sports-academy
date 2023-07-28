@@ -38,6 +38,7 @@ import * as genericActions from "../../../../store/actions/dashboard";
 // } from "firebase/firestore/lite";
 import { useNavigate } from "react-router-dom";
 import ConfirmationDialog from "../../../../components/confirmation-dialog/ConfirmationDialog";
+import { Alert } from "@mui/material";
 
 // function createData(team1, calories, fat, carbs, protein) {
 //   return {
@@ -465,6 +466,11 @@ export default function ViewMatchList() {
             </TableBody>
           </Table>
         </TableContainer>
+        {rows.length === 0 && (
+          <Alert sx={{ justifyContent: "center" }} severity="warning">
+            No Matches recorded!
+          </Alert>
+        )}
         {/* <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"

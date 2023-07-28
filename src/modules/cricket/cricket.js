@@ -86,6 +86,12 @@ const Cricket = () => {
   ];
 
   React.useEffect(() => {
+    // move to clients list page if client is not selected by super admin
+    // for other users, it will be set during login flow
+    const client = sessionStorage.getItem("client");
+    if (!client) {
+      navigate("/");
+    }
     const unloadCallback = (event) => {
       event.preventDefault();
       event.returnValue = "";
