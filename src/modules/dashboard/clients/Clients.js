@@ -2,6 +2,7 @@ import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Button from "@mui/material/Button";
 import CameraIcon from "@mui/icons-material/PhotoCamera";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -42,7 +43,7 @@ export default function Clients() {
   const navigate = useNavigate();
   const {
     loginStatus: { success, fail },
-    roles: { isSuperAdmin },
+    roles: { isSuperAdmin, isAdmin },
     clients = [],
   } = useSelector((state) => state.dashboard);
 
@@ -56,12 +57,13 @@ export default function Clients() {
     <ThemeProvider theme={defaultTheme}>
       <CssBaseline />
       <AppBar position="relative" sx={{ backgroundColor: "cadetblue" }}>
-        <Toolbar>
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           {/* <CameraIcon sx={{ mr: 2 }} /> */}
           <Typography variant="h6" color="inherit" noWrap>
             Selected Client:{" "}
             <strong>{selectedClient ? selectedClient.clientName : ""}</strong>
           </Typography>
+          {isAdmin && <AccountCircleIcon />}
         </Toolbar>
       </AppBar>
       <main>

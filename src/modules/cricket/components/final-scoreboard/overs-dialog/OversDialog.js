@@ -19,7 +19,10 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function OversDialog({ details: { balls, team }, handleClose }) {
+export default function OversDialog({
+  details: { balls, team, overs },
+  handleClose,
+}) {
   const maxOver = balls.length > 0 ? Math.max(...balls.map((o) => o.over)) : -1;
 
   const getOverDetails = (over) => {
@@ -29,7 +32,7 @@ export default function OversDialog({ details: { balls, team }, handleClose }) {
     const bowlerName =
       curBalls && curBalls.length > 0 ? curBalls[0].bowler.name : "";
 
-    console.log(curBalls.map((b) => b.batsmen.name));
+    // console.log(curBalls.map((b) => b.batsmen.name));
     const batsmen =
       curBalls && curBalls.length > 0
         ? curBalls
@@ -98,7 +101,7 @@ export default function OversDialog({ details: { balls, team }, handleClose }) {
       <AppBar sx={{ position: "relative" }}>
         <Toolbar>
           <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-            {team} - Overs
+            {team} - Overs ({overs})
           </Typography>
           <IconButton
             edge="end"

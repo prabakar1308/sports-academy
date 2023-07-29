@@ -31,7 +31,7 @@ const dashboardReducer = (state = initialState, action) => {
     }
     case genericActions.VALIDATE_LOGIN_SUCCESS: {
       const { isSuperAdmin, data } = action.payload;
-      const { isAdmin } = data && data.length > 0 ? data[0].isAdmin : false;
+      const isAdmin = data && data.length > 0 ? data[0].isAdmin : false;
       if (data && data.length > 0) {
         sessionStorage.setItem("userDetails", JSON.stringify(action.payload));
         if (!isSuperAdmin) {

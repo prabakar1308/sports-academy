@@ -19,7 +19,7 @@ export default function FinalScoreboard() {
   // const navigate = useNavigate();
   // const navigate = useNavigate();
   const {
-    matchDetails: { team1, team2, battingFirst },
+    matchDetails: { team1, team2, battingFirst, overs },
     scoreboard: {
       isFirstInnings,
       firstInnings,
@@ -113,6 +113,7 @@ export default function FinalScoreboard() {
                 setDialogDetails({
                   balls: firstInnings.balls,
                   team: firstInnings.team.name,
+                  overs,
                 });
               }}
             />
@@ -167,6 +168,7 @@ export default function FinalScoreboard() {
                   setDialogDetails({
                     balls: secondInnings.balls,
                     team: secondInnings.team.name,
+                    overs,
                   });
                 }}
               />

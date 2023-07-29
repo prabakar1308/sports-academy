@@ -134,7 +134,9 @@ const Cricket = () => {
       if (isMatchCompleted) {
         const players = [...team1Players, ...team2Players];
         // updatePlayersFirebase(players);
-        dispatch(cricketActions.updateMatchPlayers(players));
+        const client = sessionStorage.getItem("client");
+        const algoliaIndex = client ? JSON.parse(client).algoliaIndex : "";
+        dispatch(cricketActions.updateMatchPlayers({ players, algoliaIndex }));
       }
     } else if (!isFirstInnings && unSavedActions) {
       // when first innings closed manually without balls bowled (set target as penalty runs)
@@ -149,7 +151,9 @@ const Cricket = () => {
       // when match closed manually after the save action
       const players = [...team1Players, ...team2Players];
       // updatePlayersFirebase(players);
-      dispatch(cricketActions.updateMatchPlayers(players));
+      const client = sessionStorage.getItem("client");
+      const algoliaIndex = client ? JSON.parse(client).algoliaIndex : "";
+      dispatch(cricketActions.updateMatchPlayers({ players, algoliaIndex }));
     }
   }, [isFirstInnings, isMatchCompleted]);
 

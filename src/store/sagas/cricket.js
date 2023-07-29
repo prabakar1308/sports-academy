@@ -121,9 +121,10 @@ export function* getCricketMatchesSaga(action) {
 
 export function* updateMatchPlayersSaga(action) {
   try {
-    const res = yield axios.post(`${API}/cricket/update/players`, {
-      players: action.payload,
-    });
+    const res = yield axios.post(
+      `${API}/cricket/update/players`,
+      action.payload
+    );
     if (res.status === 200) console.log(res);
   } catch (e) {
     // handle error
