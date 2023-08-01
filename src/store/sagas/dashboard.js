@@ -8,7 +8,8 @@ import * as genericActions from "../actions/dashboard";
 
 // const API = "https://nsa-academy-api-dev.onrender.com";
 // const API = "http://localhost:3001";
-const API = process.env.REACT_APP_API_URL;
+const API =
+  process.env.REACT_APP_API_URL || "https://nsa-academy-api-dev.onrender.com";
 
 export function* validateLoginPinSaga(action) {
   try {

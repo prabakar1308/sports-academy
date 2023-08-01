@@ -34,6 +34,8 @@ export const SAVE_CRICKET_MATCH_SUCCESS =
 export const UPDATE_MATCH_PLAYERS = "[cricket] UPDATE_MATCH_PLAYERS";
 export const DELETE_MATCH = "[cricket] DELETE_MATCH";
 export const DELETE_MATCH_SUCCESS = "[cricket] DELETE_MATCH_SUCCESS";
+export const REFRESH_SCOREBOARD = "[cricket] REFRESH_SCOREBOARD";
+export const REFRESH_SCOREBOARD_SUCCESS = "[cricket] REFRESH_SCOREBOARD_SUCCESS";
 
 export const getCricketTeams = (teams) => {
   return {
@@ -244,5 +246,19 @@ export const deleteCricketMatch = (data) => {
 export const deleteCricketMatchSuccess = (data) => {
   return {
     type: DELETE_MATCH_SUCCESS,
+  };
+};
+
+export const refreshScoreboard = (data) => {
+  return {
+    type: REFRESH_SCOREBOARD,
+    payload: data,
+  };
+};
+
+export const refreshScoreboardSuccess = (data) => {
+  return {
+    type: REFRESH_SCOREBOARD_SUCCESS,
+    payload: data,
   };
 };

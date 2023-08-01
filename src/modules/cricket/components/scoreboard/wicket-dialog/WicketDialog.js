@@ -154,6 +154,14 @@ export default function WicketDialog(props) {
         )}
         <Button
           sx={{ width: "90%" }}
+          variant="outlined"
+          onClick={() => onClose(null)}
+          className="update-button"
+        >
+          Cancel
+        </Button>
+        <Button
+          sx={{ width: "90%" }}
           variant="contained"
           disabled={disableButton()}
           onClick={() => onClose({ wicketType, wicketHelpedBy, batsmen })}

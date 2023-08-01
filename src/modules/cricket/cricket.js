@@ -8,6 +8,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ScoreboardIcon from "@mui/icons-material/Scoreboard";
+import RefreshIcon from '@mui/icons-material/Refresh';
 // import { setDoc, deleteDoc, doc, Timestamp } from "firebase/firestore/lite";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import ReactToPrint from "react-to-print";
@@ -18,6 +19,7 @@ import AvatarIcon from "../../components/avatar-icon/AvatarIcon";
 import { getRequiredRunDetails } from "./utils";
 import "./cricket.scss";
 import * as cricketActions from "../../store/actions/cricket";
+import * as genericActions from "../../store/actions/dashboard";
 // import { updatePlayersFirebase } from "./db-operations";
 
 const Cricket = () => {
@@ -283,6 +285,19 @@ const Cricket = () => {
                 <AvatarIcon
                   icon={<ScoreboardIcon />}
                   handleClick={() => navigatePath()}
+                  tooltip="Update Score"
+                />
+              </ListItemAvatar>
+              )}
+              {!isMatchCompleted && !(isSuperAdmin || isAdmin) && (
+              <ListItemAvatar>
+                <AvatarIcon
+                  icon={<RefreshIcon />}
+                    handleClick={() => {
+                      dispatch(genericActions.switchProgressLoader(true))
+                      dispatch(cricketActions.refreshScoreboard(scoreboard.matchId));
+                    }
+                    }
                   tooltip="Update Score"
                 />
               </ListItemAvatar>

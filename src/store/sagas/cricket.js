@@ -10,7 +10,8 @@ import * as genericActions from "../actions/dashboard";
 
 // const API = "https://nsa-academy-api-dev.onrender.com";
 // const API = "http://localhost:3001";
-const API = process.env.REACT_APP_API_URL;
+const API =
+  process.env.REACT_APP_API_URL || "https://nsa-academy-api-dev.onrender.com";
 
 function isEmpty(obj) {
   return Object.keys(obj).length === 0;
@@ -68,10 +69,12 @@ export function* createPlayerBeforeStartSaga(action) {
 
 export function* addCricketPlayerSaga(action) {
   try {
-    const { key, value } = action.payload;
+    const { key, value, isBatsmen } = action.payload;
     const res = yield axios.post(`${API}/cricket/create/player`, value);
     if (res.status === 200)
-      yield put(cricketActions.addCricketPlayerSuccess({ key, value }));
+      yield put(
+        cricketActions.addCricketPlayerSuccess({ key, value, isBatsmen })
+      );
   } catch (e) {
     // handle error
   }
@@ -119,6 +122,20 @@ export function* getCricketMatchesSaga(action) {
   }
 }
 
+export function* refreshCricketMatchSaga(action) {
+  try {
+    const matchId = action.payload;
+    const res = yield axios.get(`${API}/cricket/match/${matchId}`);
+    if (res.status === 200) {
+      const data = res.data && res.data.length > 0 ? res.data[0] : null;
+      yield put(cricketActions.refreshScoreboardSuccess(data));
+      yield put(genericActions.switchProgressLoader(false));
+    }
+  } catch (e) {
+    // handle error
+  }
+}
+
 export function* updateMatchPlayersSaga(action) {
   try {
     const res = yield axios.post(
@@ -156,6 +173,7 @@ function* getCricketWatcher() {
   yield takeLatest(cricketActions.GET_MATCH_LIST, getCricketMatchesSaga);
   yield takeLatest(cricketActions.UPDATE_MATCH_PLAYERS, updateMatchPlayersSaga);
   yield takeLatest(cricketActions.DELETE_MATCH, deleteCricketMatchSaga);
+  yield takeLatest(cricketActions.REFRESH_SCOREBOARD, refreshCricketMatchSaga);
 }
 
 export const cricketWatchers = [getCricketWatcher];

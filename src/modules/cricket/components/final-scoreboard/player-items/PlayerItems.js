@@ -78,7 +78,7 @@ export default function PlayerItems({
 
   const getWicketDetails = (player, isBatting) => {
     const { wicketType, wicketHelpedBy, isOut, bowler } = player;
-    if (wicketType && wicketHelpedBy && isOut) {
+    if (wicketType && isOut) {
       if (wicketType.value === WICKET_TYPES.BOWLED) return `b ${bowler.name}`;
       else if (wicketType.value === WICKET_TYPES.CAUGHT) {
         if (wicketHelpedBy.id === bowler.id) {

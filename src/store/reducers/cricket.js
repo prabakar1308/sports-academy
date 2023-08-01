@@ -48,6 +48,8 @@ import { getMaidenCount, getOverCount, updateTeamPlayerScore } from "./utils";
 const initialState = {
   teams: [],
   matches: [],
+  // to trigger save at the end of each over
+  canTriggerSave: false,
   matchDetails: {
     team1: null,
     team2: null,
@@ -147,13 +149,13 @@ const cricketReducer = (state = initialState, action) => {
         teams: [...state.teams, action.payload],
       };
     case cricketActions.ADD_CRICKET_PLAYER_SUCCESS: {
-      const { key, value } = action.payload;
+      const { key, value, isBatsmen } = action.payload;
       const innings = {
         ...state.scoreboard[key],
       };
       const players = [
         ...innings.players,
-        { ...value, isOut: null, isRetire: false },
+        { ...value, isOut: isBatsmen ? false : null, isRetire: false },
       ];
       return {
         ...state,
@@ -260,6 +262,7 @@ const cricketReducer = (state = initialState, action) => {
 
       return {
         ...state,
+        canTriggerSave: true,
         scoreboard: {
           ...state.scoreboard,
           [bowlerKey]: {
@@ -459,6 +462,7 @@ const cricketReducer = (state = initialState, action) => {
       return {
         ...state,
         // scoreboardEntries: [...state.scoreboardEntries, currentScoreboard],
+        canTriggerSave: false,
         scoreboard: {
           ...state.scoreboard,
           [bKey]: {
@@ -718,6 +722,17 @@ const cricketReducer = (state = initialState, action) => {
       const matchId = action.payload;
       const matches = [...state.matches].filter((mat) => mat.id !== matchId);
       return { ...state, matches };
+    }
+    case cricketActions.REFRESH_SCOREBOARD_SUCCESS: {
+      if (action.payload) {
+        const { matchDetails, scoreboard } = action.payload;
+        const details = { matchDetails, scoreboard, scoreboardEntries: [scoreboard] };
+        return {
+          ...state,
+          ...details,
+        };
+      }
+      return state;
     }
     default:
       return state;

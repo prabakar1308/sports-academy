@@ -69,6 +69,7 @@ export default function BallActions({ overDetails }) {
   const {
     scoreboardEntries,
     matchDetails,
+    canTriggerSave,
     scoreboard,
     scoreboard: { isFirstInnings, firstInnings, secondInnings },
     matchDetails: {
@@ -110,6 +111,19 @@ export default function BallActions({ overDetails }) {
     setOverBallNO(overBallNum);
   }, [overs]);
 
+  React.useEffect(() => {
+    if (canTriggerSave) {
+      // Trigger save at end of each over
+      dispatch(
+        cricketActions.saveCricketMatch({
+          scoreboard,
+          matchDetails,
+          saveAction: true,
+        })
+      );
+    }
+  }, [canTriggerSave]);
+
   const endMatch = (data) => {
     if (data) {
       setEndDialog(false);
@@ -143,14 +157,21 @@ export default function BallActions({ overDetails }) {
         striker = getPlayerDetails(
           striker,
           secondInnings.team,
-          "secondInnings"
+          "secondInnings",
+          true
         );
         nonStriker = getPlayerDetails(
           nonStriker,
           secondInnings.team,
-          "secondInnings"
+          "secondInnings",
+          true
         );
-        bowler = getPlayerDetails(bowler, firstInnings.team, "firstInnings");
+        bowler = getPlayerDetails(
+          bowler,
+          firstInnings.team,
+          "firstInnings",
+          false
+        );
       }
       dispatch(
         cricketActions.endInnings({
@@ -172,6 +193,7 @@ export default function BallActions({ overDetails }) {
         cricketActions.addCricketPlayer({
           key: bowlerKey,
           value,
+          isBatsmen: false,
           // value: { ...value, isOut: null, isRetire: false },
         })
       );
@@ -189,7 +211,7 @@ export default function BallActions({ overDetails }) {
     }
   };
 
-  const getPlayerDetails = (player, team, inningsKey) => {
+  const getPlayerDetails = (player, team, inningsKey, isBatsmen) => {
     const updatedPlayer = player ? omitProps("title", player) : null;
     if (updatedPlayer) {
       if (updatedPlayer.id) return updatedPlayer;
@@ -200,6 +222,7 @@ export default function BallActions({ overDetails }) {
           cricketActions.addCricketPlayer({
             key: inningsKey,
             value: newPlayer,
+            isBatsmen,
           })
         );
         return newPlayer;
@@ -208,61 +231,68 @@ export default function BallActions({ overDetails }) {
     return updatedPlayer;
   };
 
-  const handleNewBatsmenClose = ({ wicketType, wicketHelpedBy, batsmen }) => {
-    let newBatsmenStrike = true;
-    if (playersPerTeam === wickets + 1) {
-      // isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
-      isFirstInnings ? setOpenNewInningsDialog(true) : setEndMatchConfirm(true);
-    }
-    if (batsmen || wicketType || wicketHelpedBy) {
-      // setBatsmenDialog(false);
-      // const strikerKey = batsmen1 && batsmen1.isStriker ? "batsmen1" : "batsmen2";
-      // const nonStrikerKey = batsmen1 && batsmen1.isStriker ? "batsmen2" : "batsmen1";
-      const lastBallRun = balls.length > 0 ? balls[balls.length - 1].runs : 0;
-      const overLastBall =
-        balls.length > 0 ? balls[balls.length - 1].overLastBall : false;
-      let batsmenKey =
-        (wicketType && wicketType.value === WICKET_TYPES.RUNOUT_OTHER) ||
-        overLastBall
-          ? nonStrikerKey
-          : strikerKey;
-      newBatsmenStrike = overLastBall ? false : true;
-      if (runout && lastBallRun % 2 === 0) {
-        if (wicketType && wicketType.value === WICKET_TYPES.RUNOUT) {
-          batsmenKey = nonStrikerKey;
-          newBatsmenStrike = false;
-        } else {
-          batsmenKey = strikerKey;
-          newBatsmenStrike = true;
-        }
-      } else if (runout && lastBallRun % 2 > 0) {
-        if (wicketType && wicketType.value === WICKET_TYPES.RUNOUT) {
-          batsmenKey = strikerKey;
-          newBatsmenStrike = true;
-        } else {
-          batsmenKey = nonStrikerKey;
-          newBatsmenStrike = false;
-        }
+  const handleNewBatsmenClose = (response) => {
+    if (response) {
+      const { wicketType, wicketHelpedBy, batsmen } = response;
+      let newBatsmenStrike = true;
+      if (playersPerTeam === wickets + 1) {
+        // isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
+        isFirstInnings ? setOpenNewInningsDialog(true) : setEndMatchConfirm(true);
       }
-      // console.log(playersPerTeam, wickets, playersPerTeam === wickets + 1);
-      dispatch(
-        cricketActions.updateNewBatsmen({
-          inningsKey,
-          innings2Key,
-          batsmenKey,
-          newBatsmen: getPlayerDetails(batsmen, battingTeam, inningsKey),
-          wicketType,
-          wicketHelpedBy: getPlayerDetails(
-            wicketHelpedBy,
-            bowlingTeam,
-            innings2Key
-          ),
-          isBatsmenRetire,
-          newBatsmenStrike,
-        })
-      );
+      if (batsmen || wicketType || wicketHelpedBy) {
+        // setBatsmenDialog(false);
+        // const strikerKey = batsmen1 && batsmen1.isStriker ? "batsmen1" : "batsmen2";
+        // const nonStrikerKey = batsmen1 && batsmen1.isStriker ? "batsmen2" : "batsmen1";
+        const lastBallRun = balls.length > 0 ? balls[balls.length - 1].runs : 0;
+        const overLastBall =
+          balls.length > 0 ? balls[balls.length - 1].overLastBall : false;
+        let batsmenKey =
+          (wicketType && wicketType.value === WICKET_TYPES.RUNOUT_OTHER) ||
+            overLastBall
+            ? nonStrikerKey
+            : strikerKey;
+        newBatsmenStrike = overLastBall ? false : true;
+        if (runout && lastBallRun % 2 === 0) {
+          if (wicketType && wicketType.value === WICKET_TYPES.RUNOUT) {
+            batsmenKey = nonStrikerKey;
+            newBatsmenStrike = false;
+          } else {
+            batsmenKey = strikerKey;
+            newBatsmenStrike = true;
+          }
+        } else if (runout && lastBallRun % 2 > 0) {
+          if (wicketType && wicketType.value === WICKET_TYPES.RUNOUT) {
+            batsmenKey = strikerKey;
+            newBatsmenStrike = true;
+          } else {
+            batsmenKey = nonStrikerKey;
+            newBatsmenStrike = false;
+          }
+        }
+        // console.log(playersPerTeam, wickets, playersPerTeam === wickets + 1);
+        dispatch(
+          cricketActions.updateNewBatsmen({
+            inningsKey,
+            innings2Key,
+            batsmenKey,
+            newBatsmen: getPlayerDetails(batsmen, battingTeam, inningsKey, true),
+            wicketType,
+            wicketHelpedBy: getPlayerDetails(
+              wicketHelpedBy,
+              bowlingTeam,
+              innings2Key,
+              false
+            ),
+            isBatsmenRetire,
+            newBatsmenStrike,
+          })
+        );
+        setBatsmenDialog(false);
+        setRunout(false);
+      }
+    } else {
+      dispatch(cricketActions.undoScoreboard());      
       setBatsmenDialog(false);
-      setRunout(false);
     }
   };
 
@@ -608,7 +638,7 @@ export default function BallActions({ overDetails }) {
         <Button size="small">Learn More</Button>
       </CardActions> */}
       </Card>
-      {openDialog && (
+      {openDialog && !batsmenDialog && (
         <PlayerDialog
           team={bowlingInnings?.team}
           open={openDialog}
@@ -618,7 +648,7 @@ export default function BallActions({ overDetails }) {
           players={bowlingInnings?.players}
         />
       )}
-      {batsmenDialog && !openDialog && (
+      {batsmenDialog && (
         <WicketDialog
           team={innings?.team}
           open={batsmenDialog}
