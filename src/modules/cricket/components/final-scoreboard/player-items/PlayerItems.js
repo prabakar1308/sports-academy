@@ -170,7 +170,11 @@ export default function PlayerItems({
           </Grid>
           <Grid item xs={1}>
             <ListItemText
-              sx={{ paddingTop: "7px" }}
+              sx={{
+                paddingTop: "7px",
+                display: "flex",
+                justifyContent: "center",
+              }}
               primary={player.strikeRate || 0}
             />
           </Grid>
@@ -233,10 +237,14 @@ export default function PlayerItems({
 
   const getTotal = () => {
     const lastBall = balls && balls.length > 0 ? balls[balls.length - 1] : null;
+    const bowlingBalls = currentBowler ? currentBowler.bowlingBalls : 0;
     let overValue = 0;
     if (lastBall) {
       const { over, overBallNo } = lastBall;
-      overValue = overBallNo === 6 ? over + 1 : `${over}.${overBallNo}`;
+      // WORKAROUND - to fix first ball wide or no ball
+      const updatedOverBallNo =
+        overBallNo === 1 && bowlingBalls % 6 === 0 ? 0 : overBallNo;
+      overValue = overBallNo === 6 ? over + 1 : `${over}.${updatedOverBallNo}`;
     }
     const score = `${totalRuns}-${wickets} (${overValue})`;
     return `Total  ${score}`;

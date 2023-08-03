@@ -7,18 +7,22 @@ import Alert from "@mui/material/Alert";
 import "./NewInningsDialog.scss";
 import AutocompleteDropdown from "../../../../../components/autocomplete-dropdown/AutocompleteDropdown";
 import { TextField } from "@mui/material";
+import AutoCompleteAsync from "../../../../../components/autocomplete-async/AutoCompleteAsync";
 
 export default function NewInningsDialog(props) {
   const {
     onClose,
     open,
     players = [],
-    bowlers = [],
+    // bowlers = [],
     remainingOvers,
     stopInnings = false,
+    isFirstInnings,
+    battingTeam,
+    bowlingTeam,
   } = props;
-  const bowlerItems = bowlers.map((bow) => ({ ...bow, title: bow.name }));
-  const batsmenItems = players.map((bat) => ({ ...bat, title: bat.name }));
+  // const bowlerItems = bowlers.map((bow) => ({ ...bow, title: bow.name }));
+  // const batsmenItems = players.map((bat) => ({ ...bat, title: bat.name }));
 
   const [striker, setStriker] = React.useState(null);
   const [nonStriker, setNonStriker] = React.useState(null);
@@ -67,11 +71,18 @@ export default function NewInningsDialog(props) {
             value={null}
             handleSelection={(val) => setStriker(val)}
           /> */}
-          <AutocompleteDropdown
+          {/* <AutocompleteDropdown
             id="batsmen-1-ac"
             dropdownOptions={batsmenItems}
             placeholder="Select Striker"
             handleChange={(val) => setStriker(val)}
+          /> */}
+          <AutoCompleteAsync
+            id="batsmen-1-ac"
+            teamId={battingTeam.id}
+            placeholder="Select Striker"
+            handleChange={(val) => setStriker(val)}
+            excludedItems={players}
           />
         </div>
         <div className="wicket-type">
@@ -84,11 +95,18 @@ export default function NewInningsDialog(props) {
             value={null}
             handleSelection={(val) => setNonStriker(val)}
           /> */}
-          <AutocompleteDropdown
+          {/* <AutocompleteDropdown
             id="batsmen-2-ac"
             dropdownOptions={batsmenItems}
             placeholder="Select Non Striker"
             handleChange={(val) => setNonStriker(val)}
+          /> */}
+          <AutoCompleteAsync
+            id="batsmen-2-ac"
+            teamId={battingTeam.id}
+            placeholder="Select Non Striker"
+            handleChange={(val) => setNonStriker(val)}
+            excludedItems={players}
           />
         </div>
         {errorMsg() && (
@@ -106,26 +124,34 @@ export default function NewInningsDialog(props) {
             value={null}
             handleSelection={(val) => setBowler(val)}
           /> */}
-          <AutocompleteDropdown
+          {/* <AutocompleteDropdown
             id="bowler-1-ac"
             dropdownOptions={bowlerItems}
             placeholder="Select Bowler"
             handleChange={(val) => setBowler(val)}
+          /> */}
+          <AutoCompleteAsync
+            id="bowler-1-ac"
+            teamId={bowlingTeam.id}
+            placeholder="Select Bowler"
+            handleChange={(val) => setBowler(val)}
           />
         </div>
-        <div className="wicket-type">
-          <TextField
-            id="standard-basic"
-            label="Penalty Runs"
-            type="number"
-            variant="filled"
-            value={penaltyRuns}
-            size="small"
-            onChange={(event) => {
-              setPenaltyRuns(parseInt(event.target.value || 0, 10));
-            }}
-          />
-        </div>
+        {isFirstInnings && (
+          <div className="wicket-type">
+            <TextField
+              id="standard-basic"
+              label="Penalty Runs"
+              type="number"
+              variant="filled"
+              value={penaltyRuns}
+              size="small"
+              onChange={(event) => {
+                setPenaltyRuns(parseInt(event.target.value || 0, 10));
+              }}
+            />
+          </div>
+        )}
         <Button
           variant="contained"
           disabled={disableButton()}

@@ -20,6 +20,7 @@ import Checkbox from "@mui/material/Checkbox";
 
 // import { db } from "../../../../../database/firebase.db";
 import * as cricketActions from "../../../../../store/actions/cricket";
+import * as genericActions from "../../../../../store/actions/dashboard";
 import PlayerDialog from "../../player-dialog/PlayerDialog";
 import WicketDialog from "../wicket-dialog/WicketDialog";
 import NewInningsDialog from "../new-innings-dialog/NewInningsDialog";
@@ -114,11 +115,12 @@ export default function BallActions({ overDetails }) {
   React.useEffect(() => {
     if (canTriggerSave) {
       // Trigger save at end of each over
+      // saveAction-false to keep the scoreboard entries
       dispatch(
         cricketActions.saveCricketMatch({
           scoreboard,
           matchDetails,
-          saveAction: true,
+          saveAction: false,
         })
       );
     }
@@ -237,7 +239,9 @@ export default function BallActions({ overDetails }) {
       let newBatsmenStrike = true;
       if (playersPerTeam === wickets + 1) {
         // isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
-        isFirstInnings ? setOpenNewInningsDialog(true) : setEndMatchConfirm(true);
+        isFirstInnings
+          ? setOpenNewInningsDialog(true)
+          : setEndMatchConfirm(true);
       }
       if (batsmen || wicketType || wicketHelpedBy) {
         // setBatsmenDialog(false);
@@ -248,7 +252,7 @@ export default function BallActions({ overDetails }) {
           balls.length > 0 ? balls[balls.length - 1].overLastBall : false;
         let batsmenKey =
           (wicketType && wicketType.value === WICKET_TYPES.RUNOUT_OTHER) ||
-            overLastBall
+          overLastBall
             ? nonStrikerKey
             : strikerKey;
         newBatsmenStrike = overLastBall ? false : true;
@@ -275,7 +279,12 @@ export default function BallActions({ overDetails }) {
             inningsKey,
             innings2Key,
             batsmenKey,
-            newBatsmen: getPlayerDetails(batsmen, battingTeam, inningsKey, true),
+            newBatsmen: getPlayerDetails(
+              batsmen,
+              battingTeam,
+              inningsKey,
+              true
+            ),
             wicketType,
             wicketHelpedBy: getPlayerDetails(
               wicketHelpedBy,
@@ -291,7 +300,7 @@ export default function BallActions({ overDetails }) {
         setRunout(false);
       }
     } else {
-      dispatch(cricketActions.undoScoreboard());      
+      dispatch(cricketActions.undoScoreboard());
       setBatsmenDialog(false);
     }
   };
@@ -612,6 +621,7 @@ export default function BallActions({ overDetails }) {
                   variant="contained"
                   color="secondary"
                   onClick={() => {
+                    dispatch(genericActions.switchProgressLoader(true));
                     dispatch(
                       cricketActions.saveCricketMatch({
                         scoreboard,
@@ -644,17 +654,21 @@ export default function BallActions({ overDetails }) {
           open={openDialog}
           onClose={handleClose}
           title={"Select Bowler"}
-          excludedPlayerId={currentBowler?.id}
-          players={bowlingInnings?.players}
+          excludedPlayers={[currentBowler]}
+          // players={bowlingInnings?.players}
         />
       )}
       {batsmenDialog && (
         <WicketDialog
-          team={innings?.team}
+          battingTeam={battingTeam}
+          bowlingTeam={bowlingTeam}
           open={batsmenDialog}
           onClose={handleNewBatsmenClose}
           title={"Next Batsmen"}
-          players={innings?.players.filter((player) => player.isOut === null)}
+          excludedBatsmen={innings?.players.filter(
+            (player) => player.isOut != null
+          )}
+          players={innings?.players.filter((player) => player.isOut != null)}
           wicket={runout ? WICKET_TYPES.RUNOUT : WICKET_TYPES.CAUGHT}
           bowlers={bowlingInnings?.players}
           isBatsmenRetire={isBatsmenRetire}
@@ -670,10 +684,13 @@ export default function BallActions({ overDetails }) {
           open={openNewInningsDialog}
           onClose={startNewInnings}
           players={secondInnings?.players.filter(
-            (player) => player.isOut === null
+            (player) => player.isOut != null
           )}
-          bowlers={firstInnings?.players}
+          // bowlers={firstInnings?.players}
           remainingOvers={0}
+          isFirstInnings={isFirstInnings}
+          battingTeam={isFirstInnings ? bowlingTeam : battingTeam}
+          bowlingTeam={isFirstInnings ? battingTeam : bowlingTeam}
         />
       )}
 

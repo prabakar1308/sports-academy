@@ -1,5 +1,5 @@
 // saga.js
-import { call, put, takeLatest } from "redux-saga/effects";
+import { call, put, takeLatest, takeEvery } from "redux-saga/effects";
 import axios from "axios";
 // import { Timestamp } from "firebase/firestore/lite";
 
@@ -104,6 +104,9 @@ export function* updateMatchSaga(action) {
       if (!isEmpty(fields))
         yield put(cricketActions.updateScoreboardFields(fields));
       else if (saveAction) yield put(cricketActions.saveCricketMatchSuccess());
+      else yield put(cricketActions.resetSaveActionStatus());
+
+      yield put(genericActions.switchProgressLoader(false));
     }
   } catch (e) {
     // handle error
@@ -167,7 +170,7 @@ function* getCricketWatcher() {
     cricketActions.CREATE_PLAYER_BEFORE_START,
     createPlayerBeforeStartSaga
   );
-  yield takeLatest(cricketActions.ADD_CRICKET_PLAYER, addCricketPlayerSaga);
+  yield takeEvery(cricketActions.ADD_CRICKET_PLAYER, addCricketPlayerSaga);
   yield takeLatest(cricketActions.GET_PLAYERS_BY_TEAM, getPlayersByTeamSaga);
   yield takeLatest(cricketActions.SAVE_CRICKET_MATCH, updateMatchSaga);
   yield takeLatest(cricketActions.GET_MATCH_LIST, getCricketMatchesSaga);

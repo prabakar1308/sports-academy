@@ -8,7 +8,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ScoreboardIcon from "@mui/icons-material/Scoreboard";
-import RefreshIcon from '@mui/icons-material/Refresh';
+import RefreshIcon from "@mui/icons-material/Refresh";
 // import { setDoc, deleteDoc, doc, Timestamp } from "firebase/firestore/lite";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import ReactToPrint from "react-to-print";
@@ -129,6 +129,7 @@ const Cricket = () => {
         cricketActions.saveCricketMatch({
           scoreboard,
           matchDetails,
+          saveAction: true,
         })
       );
 
@@ -288,16 +289,17 @@ const Cricket = () => {
                   tooltip="Update Score"
                 />
               </ListItemAvatar>
-              )}
-              {!isMatchCompleted && !(isSuperAdmin || isAdmin) && (
+            )}
+            {!isMatchCompleted && !(isSuperAdmin || isAdmin) && (
               <ListItemAvatar>
                 <AvatarIcon
                   icon={<RefreshIcon />}
-                    handleClick={() => {
-                      dispatch(genericActions.switchProgressLoader(true))
-                      dispatch(cricketActions.refreshScoreboard(scoreboard.matchId));
-                    }
-                    }
+                  handleClick={() => {
+                    dispatch(genericActions.switchProgressLoader(true));
+                    dispatch(
+                      cricketActions.refreshScoreboard(scoreboard.matchId)
+                    );
+                  }}
                   tooltip="Update Score"
                 />
               </ListItemAvatar>

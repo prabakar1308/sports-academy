@@ -10,6 +10,10 @@ export const omitProps = (key, obj) => {
   return rest;
 };
 
+export function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 export const getRequiredRunDetails = ({
   balls,
   overs,

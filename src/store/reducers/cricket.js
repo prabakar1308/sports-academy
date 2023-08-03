@@ -726,13 +726,20 @@ const cricketReducer = (state = initialState, action) => {
     case cricketActions.REFRESH_SCOREBOARD_SUCCESS: {
       if (action.payload) {
         const { matchDetails, scoreboard } = action.payload;
-        const details = { matchDetails, scoreboard, scoreboardEntries: [scoreboard] };
+        const details = {
+          matchDetails,
+          scoreboard,
+          scoreboardEntries: [scoreboard],
+        };
         return {
           ...state,
           ...details,
         };
       }
       return state;
+    }
+    case cricketActions.RESET_SAVE_STATUS: {
+      return { ...state, canTriggerSave: false };
     }
     default:
       return state;

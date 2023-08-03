@@ -383,7 +383,7 @@ const AdvancedSettings = () => {
             open={open}
             onClose={handleClose}
             title={"Available Players"}
-            players={isFirstTeam() ? team1Players : team2Players}
+            // players={isFirstTeam() ? team1Players : team2Players}
           />
         )}
       </Stack>

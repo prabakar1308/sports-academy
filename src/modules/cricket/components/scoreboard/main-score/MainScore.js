@@ -49,6 +49,9 @@ export default function MainScore() {
     wickets: wickets2,
   } = secondInnings;
 
+  const battingTeam = isFirstInnings ? firstInnings.team : secondInnings.team;
+  const bowlingTeam = isFirstInnings ? secondInnings.team : firstInnings.team;
+
   const title = (
     <div className="team-title">
       {innings && innings.team ? innings.team.name : ""}
@@ -178,13 +181,16 @@ export default function MainScore() {
           open={openDialog}
           onClose={startNewInnings}
           players={secondInnings?.players.filter(
-            (player) => player.isOut === null
+            (player) => player.isOut != null
           )}
-          bowlers={firstInnings?.players}
+          // bowlers={firstInnings?.players}
           remainingOvers={remainingOvers}
           stopInnings={
             isFirstInnings && playersPerTeam !== firstInnings.wickets + 1
           }
+          isFirstInnings={isFirstInnings}
+          battingTeam={isFirstInnings ? bowlingTeam : battingTeam}
+          bowlingTeam={isFirstInnings ? battingTeam : bowlingTeam}
         />
       )}
       {endDialog && (
@@ -197,6 +203,7 @@ export default function MainScore() {
           team1={team1}
           team2={team2}
           allWickets={playersPerTeam === wickets2 + 1}
+          forceStop
         />
       )}
     </div>
