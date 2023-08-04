@@ -10,7 +10,7 @@ import ToggleButtons from "../../../../../components/toggleButton/ToggleButton";
 import { WICKET_TYPES } from "../../../constants";
 import "./WicketDialog.scss";
 import AutocompleteDropdown from "../../../../../components/autocomplete-dropdown/AutocompleteDropdown";
-import AutoCompleteAsync from "../../../../../components/autocomplete-async/AutoCompleteAsync";
+import AutoCompleteAsync from "../../autocomplete-async/AutoCompleteAsync";
 
 export default function WicketDialog(props) {
   const {

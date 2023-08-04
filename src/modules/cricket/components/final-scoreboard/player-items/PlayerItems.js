@@ -262,8 +262,8 @@ export default function PlayerItems({
   const getUpcomingBatsmens = (players) => {
     let data = "";
     [...players]
-      .sort((a, b) => a.name.localeCompare(b.name))
       .filter((p) => p.isOut === null)
+      .sort((a, b) => a.name.localeCompare(b.name))
       .forEach((p) =>
         data
           ? (data = `${data}, ${p.name}`)
@@ -272,6 +272,8 @@ export default function PlayerItems({
     return data;
   };
 
+  console.log(players);
+
   return (
     <>
       <List
@@ -279,12 +281,14 @@ export default function PlayerItems({
         sx={{ width: "100%", bgcolor: "background.paper" }}
       >
         {getListItemHeader(batsmenHeaders)}
-        {players.map((player, index) => {
-          if (player.isOut) return getListItem(player, false, index);
-          else if (player.isOut === false)
-            return getCurrentBatsmen(player, index);
-          else <></>;
-        })}
+        {players
+          .sort((a, b) => a.battingOrder - b.battingOrder)
+          .map((player, index) => {
+            if (player.isOut) return getListItem(player, false, index);
+            else if (player.isOut === false)
+              return getCurrentBatsmen(player, index);
+            else <></>;
+          })}
         {/* current batting players */}
         {/* {players.map((player, index) => {
         return player.isOut === false ? (

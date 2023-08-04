@@ -3,6 +3,7 @@ import TextField from "@mui/material/TextField";
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
+import { setPlayerForCurrentMatch } from "../../utils";
 
 const filter = createFilterOptions();
 
@@ -31,7 +32,12 @@ export default function AutoCompleteAsync({
         "https://nsa-academy-api-dev.onrender.com";
       const response = await axios.get(`${API}/cricket/getPlayers/${teamId}`);
       if (active && response && response.status === 200) {
-        setOptions([...response.data].map((pl) => ({ ...pl, title: pl.name })));
+        setOptions(
+          [...response.data].map((pl) => ({
+            ...setPlayerForCurrentMatch(pl),
+            title: pl.name,
+          }))
+        );
       }
     })();
 

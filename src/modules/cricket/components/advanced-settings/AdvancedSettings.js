@@ -23,7 +23,7 @@ import {
 } from "firebase/firestore/lite";
 import * as cricketActions from "../../../../store/actions/cricket";
 import PlayerDialog from "../player-dialog/PlayerDialog";
-import { setPlayerForCurrentMatch } from "../../utils";
+import { getBattingOrder, setPlayerForCurrentMatch } from "../../utils";
 
 import "./AdvancedSettings.scss";
 
@@ -175,6 +175,7 @@ const AdvancedSettings = () => {
                 ? false
                 : null,
             isRetire: false,
+            battingOrder: getBattingOrder(striker.id, nonStriker.id, player.id),
           })),
           batsmen1: { ...setPlayerForCurrentMatch(striker), isStriker: true },
           batsmen2: {

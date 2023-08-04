@@ -248,6 +248,7 @@ export const deleteCricketMatch = (data) => {
 export const deleteCricketMatchSuccess = (data) => {
   return {
     type: DELETE_MATCH_SUCCESS,
+    payload: data,
   };
 };
 

@@ -1,8 +1,13 @@
 import { WICKET_TYPES } from "../../modules/cricket/constants";
 
-import { omitProps } from "../../modules/cricket/utils";
+import { getBattingOrder, omitProps } from "../../modules/cricket/utils";
 import * as cricketActions from "../actions/cricket";
-import { getMaidenCount, getOverCount, updateTeamPlayerScore } from "./utils";
+import {
+  getCurrentMatchScoreDetails,
+  getMaidenCount,
+  getOverCount,
+  updateTeamPlayerScore,
+} from "./utils";
 
 // import data from "./cricketData";
 // import { updateCurrentBowlerDetails } from "./utils";
@@ -50,6 +55,8 @@ const initialState = {
   matches: [],
   // to trigger save at the end of each over
   canTriggerSave: false,
+  currentMatchPlayers: [],
+  battingOrder: 3,
   matchDetails: {
     team1: null,
     team2: null,
@@ -155,10 +162,16 @@ const cricketReducer = (state = initialState, action) => {
       };
       const players = [
         ...innings.players,
-        { ...value, isOut: isBatsmen ? false : null, isRetire: false },
+        {
+          ...value,
+          isOut: isBatsmen ? false : null,
+          isRetire: false,
+          battingOrder: isBatsmen ? state.battingOrder : undefined,
+        },
       ];
       return {
         ...state,
+        battingOrder: isBatsmen ? state.battingOrder + 1 : state.battingOrder,
         scoreboard: {
           ...state.scoreboard,
           [key]: {
@@ -318,6 +331,7 @@ const cricketReducer = (state = initialState, action) => {
       );
       console.log("newBatsmenIndex", newBatsmenIndex);
       if (batsmenExists >= 0) {
+        const battingOrder = batsmens[batsmenExists].battingOrder;
         batsmens.splice(batsmenExists, 1, {
           ...innings[batsmenKey],
           isOut: isBatsmenRetire ? false : true,
@@ -325,6 +339,7 @@ const cricketReducer = (state = initialState, action) => {
           wicketType: isBatsmenRetire ? null : wicketType,
           wicketHelpedBy: isBatsmenRetire ? null : wicketHelpedBy,
           bowler: innings.currentBowler,
+          battingOrder,
         });
         // batsmens[batsmenExists].isOut = true;
       }
@@ -334,10 +349,13 @@ const cricketReducer = (state = initialState, action) => {
           ...batsmens[newBatsmenIndex],
           // [INFO]: set as false to mark new batsmen as current bastmen
           isOut: false,
+          battingOrder: state.battingOrder,
         });
       }
       return {
         ...state,
+        battingOrder:
+          newBatsmenIndex >= 0 ? state.battingOrder + 1 : state.battingOrder,
         scoreboard: {
           ...state.scoreboard,
           [inningsKey]: {
@@ -553,8 +571,13 @@ const cricketReducer = (state = initialState, action) => {
             ...striker,
             isStriker: true,
             isOut: false,
+            battingOrder: 1,
           }),
-          batsmen2: omitProps("value", { ...nonStriker, isOut: false }),
+          batsmen2: omitProps("value", {
+            ...nonStriker,
+            isOut: false,
+            battingOrder: 2,
+          }),
           players: secondInnings.players.map((player) => ({
             ...player,
             // [INFO]: isOut: null --> yet to bat & isOut: false ---> current batsmens
@@ -563,6 +586,7 @@ const cricketReducer = (state = initialState, action) => {
                 ? false
                 : null,
             isRetire: false,
+            battingOrder: getBattingOrder(striker.id, nonStriker.id, player.id),
           })),
           currentBowler: omitProps("value", bowler),
         };
@@ -579,9 +603,18 @@ const cricketReducer = (state = initialState, action) => {
           (bat) => bat.id === batsmen1.id
         );
         if (batsmen1Exists >= 0) {
-          players.splice(batsmen1Exists, 1, { ...batsmen1, isOut: false });
+          const battingOrder = players[batsmen1Exists].battingOrder;
+          players.splice(batsmen1Exists, 1, {
+            ...batsmen1,
+            isOut: false,
+            battingOrder,
+          });
         } else {
-          players.push({ ...batsmen1, isOut: false });
+          players.push({
+            ...batsmen1,
+            isOut: false,
+            battingOrder: state.battingOrder,
+          });
         }
       }
       // batsmen 2
@@ -590,9 +623,18 @@ const cricketReducer = (state = initialState, action) => {
           (bat) => bat.id === batsmen2.id
         );
         if (batsmen2Exists >= 0) {
-          players.splice(batsmen2Exists, 1, { ...batsmen2, isOut: false });
+          const battingOrder = players[batsmen2Exists].battingOrder;
+          players.splice(batsmen2Exists, 1, {
+            ...batsmen2,
+            isOut: false,
+            battingOrder,
+          });
         } else {
-          players.push({ ...batsmen2, isOut: false });
+          players.push({
+            ...batsmen2,
+            isOut: false,
+            battingOrder: state.battingOrder + 1,
+          });
         }
       }
       // bowler
@@ -619,6 +661,7 @@ const cricketReducer = (state = initialState, action) => {
 
       return {
         ...state,
+        battingOrder: 3, // for next innnings start
         scoreboard: {
           ...state.scoreboard,
           isFirstInnings: false,
@@ -640,6 +683,7 @@ const cricketReducer = (state = initialState, action) => {
         unSavedActions = false,
       } = action.payload || {};
 
+      const firstInnings = { ...state.scoreboard.firstInnings };
       // update batsmen & bowlers
       let secondInnings = { ...state.scoreboard.secondInnings };
       let { batsmen1, batsmen2, currentBowler } = secondInnings;
@@ -698,10 +742,16 @@ const cricketReducer = (state = initialState, action) => {
         ...state.matchDetails,
       });
 
+      const currentMatchPlayers = getCurrentMatchScoreDetails(
+        [...firstInnings.players, ...secondInnings.players],
+        [...firstInnings.bowlers, ...secondInnings.bowlers]
+      );
+
       console.log(team1Players, team2Players);
 
       return {
         ...state,
+        currentMatchPlayers,
         scoreboard,
         matchDetails: {
           ...state.matchDetails,
@@ -720,7 +770,9 @@ const cricketReducer = (state = initialState, action) => {
     }
     case cricketActions.DELETE_MATCH_SUCCESS: {
       const matchId = action.payload;
-      const matches = [...state.matches].filter((mat) => mat.id !== matchId);
+      const matches = [...state.matches].filter(
+        (mat) => mat.matchId !== matchId
+      );
       return { ...state, matches };
     }
     case cricketActions.REFRESH_SCOREBOARD_SUCCESS: {

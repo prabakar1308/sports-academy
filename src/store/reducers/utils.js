@@ -236,7 +236,6 @@ export const updateTeamPlayerScore = (scoreboard, matchDetails) => {
     players2Key = "team1Players";
   }
 
-  console.log("dssddsds");
   // if (team1 && battingFirst && team1.id === battingFirst.id) {
   const batsmens1 = updateBatsmen(players1, firstInnings.players);
   players1 = updateBowler(players1, secondInnings.bowlers, batsmens1);
@@ -319,3 +318,35 @@ export const updateTeamPlayerScore = (scoreboard, matchDetails) => {
 //     return player;
 //   });
 // };
+
+// generate this to store in algolia (individual match record)
+export const getCurrentMatchScoreDetails = (players, bowlers) => {
+  return players.map((player) => {
+    const filteredBowler = bowlers.filter((bow) => bow.id === player.id);
+    return {
+      teamId: player.teamId,
+      id: player.id,
+      name: player.name,
+      battingInnings: 1,
+      dotBalls: player.dotBalls,
+      runs: player.runs,
+      balls: player.balls,
+      sixes: player.sixes,
+      fours: player.fours,
+      isOut: player.isOut,
+      isRetire: player.isRetire,
+      catches: player.catches,
+
+      bowlingInnings: filteredBowler.length > 0 ? 1 : 0,
+      bowlingBalls:
+        filteredBowler.length > 0 ? filteredBowler[0].bowlingBalls : 0,
+      bowlingRuns:
+        filteredBowler.length > 0 ? filteredBowler[0].bowlingRuns : 0,
+      bowlingDotBalls:
+        filteredBowler.length > 0 ? filteredBowler[0].bowlingDotBalls : 0,
+      overs: filteredBowler.length > 0 ? filteredBowler[0].overs : 0,
+      maidens: filteredBowler.length > 0 ? filteredBowler[0].maidens : 0,
+      wickets: filteredBowler.length > 0 ? filteredBowler[0].wickets : 0,
+    };
+  });
+};

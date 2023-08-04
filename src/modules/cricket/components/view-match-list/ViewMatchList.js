@@ -267,6 +267,7 @@ EnhancedTableHead.propTypes = {
 export default function ViewMatchList() {
   const { matches } = useSelector((state) => state.cricket);
   const {
+    progressLoader,
     roles: { isSuperAdmin, isAdmin },
   } = useSelector((state) => state.dashboard);
 
@@ -472,7 +473,7 @@ export default function ViewMatchList() {
             </TableBody>
           </Table>
         </TableContainer>
-        {rows.length === 0 && (
+        {rows.length === 0 && !progressLoader && (
           <Alert sx={{ justifyContent: "center" }} severity="warning">
             No Matches recorded!
           </Alert>

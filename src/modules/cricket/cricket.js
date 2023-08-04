@@ -30,6 +30,7 @@ const Cricket = () => {
 
   const {
     matchDetails,
+    currentMatchPlayers,
     matchDetails: { overs, team1Players, team2Players },
     scoreboardEntries,
     scoreboard,
@@ -139,7 +140,13 @@ const Cricket = () => {
         // updatePlayersFirebase(players);
         const client = sessionStorage.getItem("client");
         const algoliaIndex = client ? JSON.parse(client).algoliaIndex : "";
-        dispatch(cricketActions.updateMatchPlayers({ players, algoliaIndex }));
+        dispatch(
+          cricketActions.updateMatchPlayers({
+            players,
+            algoliaIndex,
+            currentMatchPlayers,
+          })
+        );
       }
     } else if (!isFirstInnings && unSavedActions) {
       // when first innings closed manually without balls bowled (set target as penalty runs)
@@ -150,13 +157,19 @@ const Cricket = () => {
         })
       );
       // updateMatch(scoreboard, matchDetails);
-    } else if (isMatchCompleted && unSavedActions) {
+    } else if (isMatchCompleted && !unSavedActions) {
       // when match closed manually after the save action
       const players = [...team1Players, ...team2Players];
       // updatePlayersFirebase(players);
       const client = sessionStorage.getItem("client");
       const algoliaIndex = client ? JSON.parse(client).algoliaIndex : "";
-      dispatch(cricketActions.updateMatchPlayers({ players, algoliaIndex }));
+      dispatch(
+        cricketActions.updateMatchPlayers({
+          players,
+          algoliaIndex,
+          currentMatchPlayers,
+        })
+      );
     }
   }, [isFirstInnings, isMatchCompleted]);
 

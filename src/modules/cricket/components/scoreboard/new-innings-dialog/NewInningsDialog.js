@@ -7,7 +7,7 @@ import Alert from "@mui/material/Alert";
 import "./NewInningsDialog.scss";
 import AutocompleteDropdown from "../../../../../components/autocomplete-dropdown/AutocompleteDropdown";
 import { TextField } from "@mui/material";
-import AutoCompleteAsync from "../../../../../components/autocomplete-async/AutoCompleteAsync";
+import AutoCompleteAsync from "../../autocomplete-async/AutoCompleteAsync";
 
 export default function NewInningsDialog(props) {
   const {

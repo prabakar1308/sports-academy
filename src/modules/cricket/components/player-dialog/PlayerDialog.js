@@ -16,7 +16,7 @@ import Dialog from "@mui/material/Dialog";
 import "./PlayerDialog.scss";
 import { getNewPlayerDetails, omitProps } from "../../utils";
 import AutocompleteDropdown from "../../../../components/autocomplete-dropdown/AutocompleteDropdown";
-import AutoCompleteAsync from "../../../../components/autocomplete-async/AutoCompleteAsync";
+import AutoCompleteAsync from "../autocomplete-async/AutoCompleteAsync";
 
 export default function PlayerDialog(props) {
   const {
