@@ -114,6 +114,8 @@ const updateBowler = (mainPlayers, bowlers, batsmens) => {
         matches,
         wides,
         noBalls,
+        sixesConceded,
+        foursConceded,
       } = filteredPlayer[0];
 
       const moreWickets = bestBowlingWickets <= player.wickets;
@@ -122,6 +124,8 @@ const updateBowler = (mainPlayers, bowlers, batsmens) => {
         wickets: player.wickets + wickets,
         wides: player.wides + wides,
         noBalls: player.noBalls + noBalls,
+        sixesConceded: player.sixesConceded + sixesConceded,
+        foursConceded: player.foursConceded + foursConceded,
         matches: matches + 1,
         bowlingRuns: player.bowlingRuns + bowlingRuns,
         bowlingBalls: player.bowlingBalls + bowlingBalls,
@@ -145,6 +149,8 @@ const updateBowler = (mainPlayers, bowlers, batsmens) => {
         bowlingInnings: player.bowlingInnings + 1,
         wickets: player.wickets,
         wides: player.wides,
+        sixesConceded: player.sixesConceded,
+        foursConceded: player.foursConceded,
         noBalls: player.noBalls,
         bowlingRuns: player.bowlingRuns,
         bowlingBalls: player.bowlingBalls,
@@ -363,6 +369,10 @@ export const getCurrentMatchScoreDetails = (players, bowlers) => {
       wickets: filteredBowler.length > 0 ? filteredBowler[0].wickets : 0,
       wides: filteredBowler.length > 0 ? filteredBowler[0].wides : 0,
       noBalls: filteredBowler.length > 0 ? filteredBowler[0].noBalls : 0,
+      sixesConceded:
+        filteredBowler.length > 0 ? filteredBowler[0].sixesConceded : 0,
+      foursConceded:
+        filteredBowler.length > 0 ? filteredBowler[0].foursConceded : 0,
     };
   });
 };

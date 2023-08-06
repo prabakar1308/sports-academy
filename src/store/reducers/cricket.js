@@ -431,6 +431,12 @@ const cricketReducer = (state = initialState, action) => {
         const noBallsCount = innings.currentBowler.noBalls
           ? innings.currentBowler.noBalls + noBalls
           : noBalls;
+        const sixesConcededCount = innings.currentBowler.sixesConceded
+          ? innings.currentBowler.sixesConceded + sixesCount
+          : sixesCount;
+        const foursConcededCount = innings.currentBowler.foursConceded
+          ? innings.currentBowler.foursConceded + foursCount
+          : foursCount;
 
         const strikerUpdate =
           (bValue.runs % 2 === 0 && !bValue.overLastBall && !bValue.runout) ||
@@ -456,6 +462,8 @@ const cricketReducer = (state = initialState, action) => {
             wickets: bowlingWickets,
             wides: widesCount,
             noBalls: noBallsCount,
+            sixesConceded: sixesConcededCount,
+            foursConceded: foursConcededCount,
           },
           [strikerKey]: {
             ...innings[strikerKey],

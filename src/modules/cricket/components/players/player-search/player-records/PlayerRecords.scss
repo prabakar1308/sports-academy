@@ -9,14 +9,23 @@
       border-bottom: 1px solid cadetblue;
     }
 
+    thead,
+    tbody {
+      border: 1px solid cadetblue;
+    }
+
     .batting-section {
-      background-color: #dfe7c1;
+      // background-color: #ecf1d9;
     }
     .bowling-section {
-      background-color: #cde9d9;
+      // background-color: #d9e1dc;
+    }
+    .margin-right-border {
+      border-right: 1px solid cadetblue;
     }
     .date-section {
-      background-color: #c9e4c3;
+      border-right: 1px solid cadetblue;
+      // background-color: #c9e4c3;
       font-weight: bold;
     }
   }

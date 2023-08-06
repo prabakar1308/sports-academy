@@ -65,7 +65,7 @@ function preventDefault(event) {
 export default function PlayerRecords({ records }) {
   return (
     <div className="player-records-wrapper">
-      <Typography component="h2" variant="h6" color="primary" gutterBottom>
+      <Typography variant="h6" color="primary" gutterBottom>
         Recent Matches
       </Typography>
       <Table size="medium">
@@ -75,7 +75,9 @@ export default function PlayerRecords({ records }) {
             <TableCell className="batting-section">R</TableCell>
             <TableCell className="batting-section">B</TableCell>
             <TableCell className="batting-section">4's</TableCell>
-            <TableCell className="batting-section">6's</TableCell>
+            <TableCell className="batting-section margin-right-border">
+              6's
+            </TableCell>
 
             {/* <TableCell>Bow Inn</TableCell> */}
             <TableCell className="bowling-section">R</TableCell>
@@ -104,7 +106,7 @@ export default function PlayerRecords({ records }) {
                     <TableCell className="batting-section">
                       {row.battingInnings ? row.fours : "-"}
                     </TableCell>
-                    <TableCell className="batting-section">
+                    <TableCell className="batting-section margin-right-border">
                       {row.battingInnings ? row.sixes : "-"}
                     </TableCell>
 

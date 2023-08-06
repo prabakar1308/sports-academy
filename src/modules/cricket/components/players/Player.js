@@ -66,7 +66,7 @@ export default function PlayersHome() {
         >
           <Tab label="Stats" {...a11yProps(0)} />
           <Tab label="Match Wise" {...a11yProps(1)} />
-          <Tab label="Compare" {...a11yProps(2)} />
+          <Tab label="Records" {...a11yProps(2)} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>

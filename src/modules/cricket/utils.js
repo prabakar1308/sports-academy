@@ -90,6 +90,8 @@ export const getNewPlayerDetails = (name, teamId) => {
     maidens: 0,
     wides: 0,
     noBalls: 0,
+    sixesConceded: 0,
+    foursConceded: 0,
     // econRate: 0, //
   };
 };
@@ -109,6 +111,10 @@ export const setPlayerForCurrentMatch = (player) => {
     bowlingRuns: 0,
     overs: 0,
     maidens: 0,
+    wides: 0,
+    noBalls: 0,
+    sixesConceded: 0,
+    foursConceded: 0,
   };
 };
 
