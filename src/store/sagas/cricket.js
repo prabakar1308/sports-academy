@@ -69,11 +69,16 @@ export function* createPlayerBeforeStartSaga(action) {
 
 export function* addCricketPlayerSaga(action) {
   try {
-    const { key, value, isBatsmen } = action.payload;
+    const { key, value, isBatsmen, addCatch } = action.payload;
     const res = yield axios.post(`${API}/cricket/create/player`, value);
     if (res.status === 200)
       yield put(
-        cricketActions.addCricketPlayerSuccess({ key, value, isBatsmen })
+        cricketActions.addCricketPlayerSuccess({
+          key,
+          value,
+          isBatsmen,
+          addCatch,
+        })
       );
   } catch (e) {
     // handle error

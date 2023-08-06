@@ -74,8 +74,9 @@ export const getMaidenCount = (innings) => {
 };
 
 export const getOverCount = (innings) => {
-  return innings.balls.filter((b) => b.over === innings.currentOver).length ===
-    6
+  return innings.balls.filter(
+    (b) => b.over === innings.currentOver && !b.wide && !b.noBall
+  ).length === 6
     ? 1
     : 0;
 };
@@ -103,7 +104,6 @@ const updateBowler = (mainPlayers, bowlers, batsmens) => {
     if (filteredPlayer && filteredPlayer.length > 0) {
       const {
         wickets,
-        catches,
         bowlingRuns,
         bowlingBalls,
         bowlingDotBalls,
@@ -112,14 +112,17 @@ const updateBowler = (mainPlayers, bowlers, batsmens) => {
         bestBowlingWickets,
         bestBowlingRuns,
         matches,
+        wides,
+        noBalls,
       } = filteredPlayer[0];
 
       const moreWickets = bestBowlingWickets <= player.wickets;
 
       newDetails = {
         wickets: player.wickets + wickets,
+        wides: player.wides + wides,
+        noBalls: player.noBalls + noBalls,
         matches: matches + 1,
-        catches: player.catches + catches,
         bowlingRuns: player.bowlingRuns + bowlingRuns,
         bowlingBalls: player.bowlingBalls + bowlingBalls,
         bowlingDotBalls: player.bowlingDotBalls + bowlingDotBalls,
@@ -140,6 +143,14 @@ const updateBowler = (mainPlayers, bowlers, batsmens) => {
         bestBowlingWickets: player.wickets,
         bestBowlingRuns: player.bowlingRuns,
         bowlingInnings: player.bowlingInnings + 1,
+        wickets: player.wickets,
+        wides: player.wides,
+        noBalls: player.noBalls,
+        bowlingRuns: player.bowlingRuns,
+        bowlingBalls: player.bowlingBalls,
+        bowlingDotBalls: player.bowlingDotBalls,
+        overs: player.overs,
+        maidens: player.maidens,
       };
     }
 
@@ -177,6 +188,7 @@ const updateBatsmen = (mainPlayers, batsmens) => {
         sixes,
         highestScore,
         highestScoreNotOut,
+        catches,
       } = filteredPlayer[0];
       newDetails = {
         matches: matches + 1,
@@ -196,6 +208,7 @@ const updateBatsmen = (mainPlayers, batsmens) => {
           player.isOut || player.isOut === false
             ? player.battingInnings + 1
             : player.battingInnings,
+        catches: player.catches + catches,
       };
     } else {
       newDetails = {
@@ -236,6 +249,7 @@ export const updateTeamPlayerScore = (scoreboard, matchDetails) => {
     players2Key = "team1Players";
   }
 
+  console.log("test");
   // if (team1 && battingFirst && team1.id === battingFirst.id) {
   const batsmens1 = updateBatsmen(players1, firstInnings.players);
   players1 = updateBowler(players1, secondInnings.bowlers, batsmens1);
@@ -327,7 +341,7 @@ export const getCurrentMatchScoreDetails = (players, bowlers) => {
       teamId: player.teamId,
       id: player.id,
       name: player.name,
-      battingInnings: 1,
+      battingInnings: player.isOut === null ? 0 : 1,
       dotBalls: player.dotBalls,
       runs: player.runs,
       balls: player.balls,
@@ -347,6 +361,8 @@ export const getCurrentMatchScoreDetails = (players, bowlers) => {
       overs: filteredBowler.length > 0 ? filteredBowler[0].overs : 0,
       maidens: filteredBowler.length > 0 ? filteredBowler[0].maidens : 0,
       wickets: filteredBowler.length > 0 ? filteredBowler[0].wickets : 0,
+      wides: filteredBowler.length > 0 ? filteredBowler[0].wides : 0,
+      noBalls: filteredBowler.length > 0 ? filteredBowler[0].noBalls : 0,
     };
   });
 };

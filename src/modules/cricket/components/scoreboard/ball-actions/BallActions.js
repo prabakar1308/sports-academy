@@ -213,7 +213,14 @@ export default function BallActions({ overDetails }) {
     }
   };
 
-  const getPlayerDetails = (player, team, inningsKey, isBatsmen) => {
+  // addCtach added for newly created player to maintain catched count
+  const getPlayerDetails = (
+    player,
+    team,
+    inningsKey,
+    isBatsmen,
+    addCatch = false
+  ) => {
     const updatedPlayer = player ? omitProps("title", player) : null;
     if (updatedPlayer) {
       if (updatedPlayer.id) return updatedPlayer;
@@ -225,6 +232,7 @@ export default function BallActions({ overDetails }) {
             key: inningsKey,
             value: newPlayer,
             isBatsmen,
+            addCatch,
           })
         );
         return newPlayer;
@@ -290,7 +298,10 @@ export default function BallActions({ overDetails }) {
               wicketHelpedBy,
               bowlingTeam,
               innings2Key,
-              false
+              false,
+              wicketType && wicketType.value === WICKET_TYPES.CAUGHT
+                ? true
+                : false
             ),
             isBatsmenRetire,
             newBatsmenStrike,

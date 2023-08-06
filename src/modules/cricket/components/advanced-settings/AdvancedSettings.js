@@ -11,17 +11,9 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { v4 as uuid } from "uuid";
-// import { Timestamp } from "firebase/firestore/lite";
 
-// import { db } from "../../../../database/firebase.db";
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  setDoc,
-  doc,
-} from "firebase/firestore/lite";
 import * as cricketActions from "../../../../store/actions/cricket";
+import * as genericActions from "../../../../store/actions/dashboard";
 import PlayerDialog from "../player-dialog/PlayerDialog";
 import { getBattingOrder, setPlayerForCurrentMatch } from "../../utils";
 
@@ -223,6 +215,7 @@ const AdvancedSettings = () => {
       };
       // dispatch(cricketActions.updateScoreboardFields(fields));
       // createMatch(scoreboard, matchDetails, fields);
+      dispatch(genericActions.switchProgressLoader(true));
       dispatch(
         cricketActions.saveCricketMatch({
           scoreboard,

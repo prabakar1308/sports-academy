@@ -1,0 +1,23 @@
+.player-records-wrapper {
+  .MuiTable-root {
+    td,
+    th {
+      padding: 12px 6px;
+    }
+
+    th {
+      border-bottom: 1px solid cadetblue;
+    }
+
+    .batting-section {
+      background-color: #dfe7c1;
+    }
+    .bowling-section {
+      background-color: #cde9d9;
+    }
+    .date-section {
+      background-color: #c9e4c3;
+      font-weight: bold;
+    }
+  }
+}

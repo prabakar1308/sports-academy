@@ -30,14 +30,33 @@ export default function AutoCompleteAsync({
       const API =
         process.env.REACT_APP_API_URL ||
         "https://nsa-academy-api-dev.onrender.com";
-      const response = await axios.get(`${API}/cricket/getPlayers/${teamId}`);
-      if (active && response && response.status === 200) {
-        setOptions(
-          [...response.data].map((pl) => ({
-            ...setPlayerForCurrentMatch(pl),
-            title: pl.name,
-          }))
+      if (teamId) {
+        const response = await axios.get(`${API}/cricket/getPlayers/${teamId}`);
+        if (active && response && response.status === 200) {
+          setOptions(
+            [...response.data].map((pl) => ({
+              ...setPlayerForCurrentMatch(pl),
+              title: pl.name,
+            }))
+          );
+        } else {
+          setOptions([{ id: -1, title: "No Players Available" }]);
+        }
+      } else {
+        const client = JSON.parse(sessionStorage.getItem("client"));
+        const response = await axios.get(
+          `${API}/cricket/getAllPlayers/${client ? client.clientId : 0}`
         );
+        if (active && response && response.status === 200) {
+          setOptions(
+            [...response.data].map((pl) => ({
+              ...pl,
+              title: pl.name,
+            }))
+          );
+        } else {
+          setOptions([{ id: -1, title: "No Players Available" }]);
+        }
       }
     })();
 
@@ -67,11 +86,11 @@ export default function AutoCompleteAsync({
         setOpen(false);
       }}
       getOptionDisabled={(option) => {
-        console.log(
-          option,
-          excludedItems,
-          excludedItems.filter((item) => item.id === option.id).length > 0
-        );
+        // console.log(
+        //   option,
+        //   excludedItems,
+        //   excludedItems.filter((item) => item.id === option.id).length > 0
+        // );
         return excludedItems.filter((item) => item.id === option.id).length > 0;
       }}
       isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -115,7 +134,7 @@ export default function AutoCompleteAsync({
         const isExisting = options.some(
           (option) => inputValue === option.title
         );
-        if (inputValue !== "" && !isExisting) {
+        if (inputValue !== "" && !isExisting && teamId) {
           filtered.push({
             inputValue,
             title: `Add "${inputValue}"`,

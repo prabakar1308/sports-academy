@@ -1,0 +1,19 @@
+.player-stats-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  .MuiAutocomplete-root {
+    display: flex;
+    justify-content: center;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .MuiGrid-item {
+    padding-top: 10px;
+  }
+}

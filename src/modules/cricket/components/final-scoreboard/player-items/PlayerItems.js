@@ -272,7 +272,10 @@ export default function PlayerItems({
     return data;
   };
 
-  console.log(players);
+  // console.log(
+  //   players,
+  //   players.sort((a, b) => a.battingOrder - b.battingOrder)
+  // );
 
   return (
     <>
@@ -284,6 +287,7 @@ export default function PlayerItems({
         {players
           .sort((a, b) => a.battingOrder - b.battingOrder)
           .map((player, index) => {
+            // console.log(player.name);
             if (player.isOut) return getListItem(player, false, index);
             else if (player.isOut === false)
               return getCurrentBatsmen(player, index);

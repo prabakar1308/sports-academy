@@ -20,6 +20,7 @@ import { getRequiredRunDetails } from "./utils";
 import "./cricket.scss";
 import * as cricketActions from "../../store/actions/cricket";
 import * as genericActions from "../../store/actions/dashboard";
+import { updateTeamPlayerScore } from "../../store/reducers/utils";
 // import { updatePlayersFirebase } from "./db-operations";
 
 const Cricket = () => {
@@ -31,7 +32,7 @@ const Cricket = () => {
   const {
     matchDetails,
     currentMatchPlayers,
-    matchDetails: { overs, team1Players, team2Players },
+    matchDetails: { overs },
     scoreboardEntries,
     scoreboard,
     scoreboard: {
@@ -136,6 +137,10 @@ const Cricket = () => {
 
       // update players in db
       if (isMatchCompleted) {
+        const { team1Players, team2Players } = updateTeamPlayerScore(
+          scoreboard,
+          matchDetails
+        );
         const players = [...team1Players, ...team2Players];
         // updatePlayersFirebase(players);
         const client = sessionStorage.getItem("client");
@@ -157,9 +162,14 @@ const Cricket = () => {
         })
       );
       // updateMatch(scoreboard, matchDetails);
-    } else if (isMatchCompleted && !unSavedActions) {
+    } else if (isMatchCompleted && unSavedActions) {
       // when match closed manually after the save action
+      const { team1Players, team2Players } = updateTeamPlayerScore(
+        scoreboard,
+        matchDetails
+      );
       const players = [...team1Players, ...team2Players];
+
       // updatePlayersFirebase(players);
       const client = sessionStorage.getItem("client");
       const algoliaIndex = client ? JSON.parse(client).algoliaIndex : "";
@@ -179,6 +189,8 @@ const Cricket = () => {
       title = "Advanced Options";
     } else if (location.pathname === "/cricket/new-match") {
       title = "Select Teams";
+    } else if (location.pathname === "/cricket/players") {
+      title = "Players";
     }
     return title;
   };
@@ -330,7 +342,11 @@ const Cricket = () => {
           </ListItem>
         </List>
       ) : (
-        <Typography className="cric-header" variant="h6">
+        <Typography
+          className="cric-header"
+          variant="h6"
+          sx={{ backgroundColor: "#d0e6e7" }}
+        >
           {getHeader()}
         </Typography>
       )}
