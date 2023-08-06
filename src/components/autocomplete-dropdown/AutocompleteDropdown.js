@@ -19,6 +19,7 @@ export default function AutocompleteDropdown({
       //   getOptionSelected={(option, value) => option.id === value.id}
       isOptionEqualToValue={(option, value) => option.id === value.id}
       onChange={(event, newValue) => {
+        console.log(newValue);
         if (typeof newValue === "string") {
           handleChange({
             title: newValue,
@@ -60,6 +61,7 @@ export default function AutocompleteDropdown({
       id={id}
       options={dropdownOptions}
       getOptionLabel={(option) => {
+        console.log("option", option);
         // Value selected with enter, right from the input
         if (typeof option === "string") {
           return option;
@@ -69,6 +71,7 @@ export default function AutocompleteDropdown({
           return option.inputValue;
         }
         // Regular option
+        console.log("Dfdfdf");
         return option.title;
       }}
       renderOption={(props, option) => <li {...props}>{option.title}</li>}

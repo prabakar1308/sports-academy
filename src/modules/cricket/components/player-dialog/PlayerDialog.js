@@ -16,6 +16,7 @@ import Dialog from "@mui/material/Dialog";
 import "./PlayerDialog.scss";
 import { getNewPlayerDetails, omitProps } from "../../utils";
 import AutocompleteDropdown from "../../../../components/autocomplete-dropdown/AutocompleteDropdown";
+import AutoCompleteAsync from "../autocomplete-async/AutoCompleteAsync";
 
 export default function PlayerDialog(props) {
   const {
@@ -23,8 +24,8 @@ export default function PlayerDialog(props) {
     team,
     open,
     title,
-    players,
-    excludedPlayerId = null,
+    // players,
+    excludedPlayers = [],
   } = props;
   // console.log("players", players, team);
   // const [isCreate, setIsCreate] = React.useState(false);
@@ -52,12 +53,12 @@ export default function PlayerDialog(props) {
     }
   };
 
-  const playerItems = players
-    .filter((pl) => pl.id !== excludedPlayerId)
-    .map((bow) => ({
-      ...bow,
-      title: bow.name,
-    }));
+  // const playerItems = players
+  //   .filter((pl) => pl.id !== excludedPlayerId)
+  //   .map((bow) => ({
+  //     ...bow,
+  //     title: bow.name,
+  //   }));
 
   return (
     <Dialog onClose={() => handleClose(null)} open={open}>
@@ -112,12 +113,21 @@ export default function PlayerDialog(props) {
               </Avatar>
             </div>
           </Paper> */}
-        <AutocompleteDropdown
+        {/* <AutocompleteDropdown
           id="player-ac"
           dropdownOptions={playerItems}
           placeholder={title}
           handleChange={handleChange}
           width={250}
+        /> */}
+
+        <AutoCompleteAsync
+          id="player-ac"
+          teamId={team.id}
+          placeholder={title}
+          handleChange={handleChange}
+          width={250}
+          excludedItems={excludedPlayers}
         />
         {/* </div> */}
         {/* </Box> */}

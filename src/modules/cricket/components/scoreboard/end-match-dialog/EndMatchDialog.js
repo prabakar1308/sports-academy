@@ -20,6 +20,7 @@ export default function EndMatchDialog(props) {
     team2,
     remainingOvers,
     allWickets = false,
+    forceStop = false,
   } = props;
   // const bowlerItems = bowlers.map((bow) => ({ ...bow, value: bow.name }));
   // const batsmenItems = players.map((bat) => ({ ...bat, value: bat.name }));
@@ -36,20 +37,23 @@ export default function EndMatchDialog(props) {
   const [text, setText] = React.useState("");
 
   React.useEffect(() => {
+    console.log(matchResult);
     let res = "";
-    if (runMargin > 0) {
-      setTeamWon(team1);
-      res = `${team1.name} won by ${runMargin} runs!`;
-    } else if (runMargin < 0) {
-      setTeamWon(team2);
-      res = `${team2.name} won by ${remainingwickets} wickets!`;
-    } else if (runMargin === 0) {
-      res = "Match Tied!";
-    } else if (matchResult.value === MATCH_RESULTS.ABONDONED) {
+    if (matchResult.value === MATCH_RESULTS.ABONDONED) {
       res = "No Result!";
+    } else {
+      if (runMargin > 0) {
+        setTeamWon(team1);
+        res = `${team1.name} won by ${runMargin} runs!`;
+      } else if (runMargin < 0) {
+        setTeamWon(team2);
+        res = `${team2.name} won by ${remainingwickets} wickets!`;
+      } else if (runMargin === 0) {
+        res = "Match Tied!";
+      }
     }
     setText(res);
-  }, []);
+  }, [matchResult]);
 
   return (
     <Dialog onClose={() => onClose(null)} open={open}>
@@ -61,6 +65,7 @@ export default function EndMatchDialog(props) {
             <Alert severity="warning">
               {remainingOvers} overs remaining in this innings!
             </Alert>
+            <br />
             <div className="wicket-type">
               <Typography variant="subtitle2" gutterBottom>
                 Match Result
@@ -74,6 +79,7 @@ export default function EndMatchDialog(props) {
             </div>
           </>
         ) : null}
+        <br />
         <Alert severity="success">
           <AlertTitle>Match Result</AlertTitle>
           {text}
@@ -85,6 +91,16 @@ export default function EndMatchDialog(props) {
         >
           FINISH
         </Button>
+
+        {forceStop && (
+          <Button
+            variant="outlined"
+            onClick={() => onClose(null)}
+            className="update-button"
+          >
+            Cancel
+          </Button>
+        )}
       </div>
     </Dialog>
   );

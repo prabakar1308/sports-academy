@@ -1,5 +1,5 @@
 // saga.js
-import { call, put, takeLatest } from "redux-saga/effects";
+import { call, put, takeLatest, takeEvery } from "redux-saga/effects";
 import axios from "axios";
 // import { Timestamp } from "firebase/firestore/lite";
 
@@ -10,7 +10,8 @@ import * as genericActions from "../actions/dashboard";
 
 // const API = "https://nsa-academy-api-dev.onrender.com";
 // const API = "http://localhost:3001";
-const API = process.env.REACT_APP_API_URL;
+const API =
+  process.env.REACT_APP_API_URL || "https://nsa-academy-api-dev.onrender.com";
 
 function isEmpty(obj) {
   return Object.keys(obj).length === 0;
@@ -68,10 +69,17 @@ export function* createPlayerBeforeStartSaga(action) {
 
 export function* addCricketPlayerSaga(action) {
   try {
-    const { key, value } = action.payload;
+    const { key, value, isBatsmen, addCatch } = action.payload;
     const res = yield axios.post(`${API}/cricket/create/player`, value);
     if (res.status === 200)
-      yield put(cricketActions.addCricketPlayerSuccess({ key, value }));
+      yield put(
+        cricketActions.addCricketPlayerSuccess({
+          key,
+          value,
+          isBatsmen,
+          addCatch,
+        })
+      );
   } catch (e) {
     // handle error
   }
@@ -101,6 +109,9 @@ export function* updateMatchSaga(action) {
       if (!isEmpty(fields))
         yield put(cricketActions.updateScoreboardFields(fields));
       else if (saveAction) yield put(cricketActions.saveCricketMatchSuccess());
+      else yield put(cricketActions.resetSaveActionStatus());
+
+      yield put(genericActions.switchProgressLoader(false));
     }
   } catch (e) {
     // handle error
@@ -119,11 +130,26 @@ export function* getCricketMatchesSaga(action) {
   }
 }
 
+export function* refreshCricketMatchSaga(action) {
+  try {
+    const matchId = action.payload;
+    const res = yield axios.get(`${API}/cricket/match/${matchId}`);
+    if (res.status === 200) {
+      const data = res.data && res.data.length > 0 ? res.data[0] : null;
+      yield put(cricketActions.refreshScoreboardSuccess(data));
+      yield put(genericActions.switchProgressLoader(false));
+    }
+  } catch (e) {
+    // handle error
+  }
+}
+
 export function* updateMatchPlayersSaga(action) {
   try {
-    const res = yield axios.post(`${API}/cricket/update/players`, {
-      players: action.payload,
-    });
+    const res = yield axios.post(
+      `${API}/cricket/update/players`,
+      action.payload
+    );
     if (res.status === 200) console.log(res);
   } catch (e) {
     // handle error
@@ -149,12 +175,13 @@ function* getCricketWatcher() {
     cricketActions.CREATE_PLAYER_BEFORE_START,
     createPlayerBeforeStartSaga
   );
-  yield takeLatest(cricketActions.ADD_CRICKET_PLAYER, addCricketPlayerSaga);
+  yield takeEvery(cricketActions.ADD_CRICKET_PLAYER, addCricketPlayerSaga);
   yield takeLatest(cricketActions.GET_PLAYERS_BY_TEAM, getPlayersByTeamSaga);
   yield takeLatest(cricketActions.SAVE_CRICKET_MATCH, updateMatchSaga);
   yield takeLatest(cricketActions.GET_MATCH_LIST, getCricketMatchesSaga);
   yield takeLatest(cricketActions.UPDATE_MATCH_PLAYERS, updateMatchPlayersSaga);
   yield takeLatest(cricketActions.DELETE_MATCH, deleteCricketMatchSaga);
+  yield takeLatest(cricketActions.REFRESH_SCOREBOARD, refreshCricketMatchSaga);
 }
 
 export const cricketWatchers = [getCricketWatcher];

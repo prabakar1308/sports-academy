@@ -78,7 +78,7 @@ export default function PlayerItems({
 
   const getWicketDetails = (player, isBatting) => {
     const { wicketType, wicketHelpedBy, isOut, bowler } = player;
-    if (wicketType && wicketHelpedBy && isOut) {
+    if (wicketType && isOut) {
       if (wicketType.value === WICKET_TYPES.BOWLED) return `b ${bowler.name}`;
       else if (wicketType.value === WICKET_TYPES.CAUGHT) {
         if (wicketHelpedBy.id === bowler.id) {
@@ -170,7 +170,11 @@ export default function PlayerItems({
           </Grid>
           <Grid item xs={1}>
             <ListItemText
-              sx={{ paddingTop: "7px" }}
+              sx={{
+                paddingTop: "7px",
+                display: "flex",
+                justifyContent: "center",
+              }}
               primary={player.strikeRate || 0}
             />
           </Grid>
@@ -233,10 +237,14 @@ export default function PlayerItems({
 
   const getTotal = () => {
     const lastBall = balls && balls.length > 0 ? balls[balls.length - 1] : null;
+    const bowlingBalls = currentBowler ? currentBowler.bowlingBalls : 0;
     let overValue = 0;
     if (lastBall) {
       const { over, overBallNo } = lastBall;
-      overValue = overBallNo === 6 ? over + 1 : `${over}.${overBallNo}`;
+      // WORKAROUND - to fix first ball wide or no ball
+      const updatedOverBallNo =
+        overBallNo === 1 && bowlingBalls % 6 === 0 ? 0 : overBallNo;
+      overValue = overBallNo === 6 ? over + 1 : `${over}.${updatedOverBallNo}`;
     }
     const score = `${totalRuns}-${wickets} (${overValue})`;
     return `Total  ${score}`;
@@ -254,8 +262,8 @@ export default function PlayerItems({
   const getUpcomingBatsmens = (players) => {
     let data = "";
     [...players]
-      .sort((a, b) => a.name.localeCompare(b.name))
       .filter((p) => p.isOut === null)
+      .sort((a, b) => a.name.localeCompare(b.name))
       .forEach((p) =>
         data
           ? (data = `${data}, ${p.name}`)
@@ -264,6 +272,11 @@ export default function PlayerItems({
     return data;
   };
 
+  // console.log(
+  //   players,
+  //   players.sort((a, b) => a.battingOrder - b.battingOrder)
+  // );
+
   return (
     <>
       <List
@@ -271,12 +284,15 @@ export default function PlayerItems({
         sx={{ width: "100%", bgcolor: "background.paper" }}
       >
         {getListItemHeader(batsmenHeaders)}
-        {players.map((player, index) => {
-          if (player.isOut) return getListItem(player, false, index);
-          else if (player.isOut === false)
-            return getCurrentBatsmen(player, index);
-          else <></>;
-        })}
+        {players
+          .sort((a, b) => a.battingOrder - b.battingOrder)
+          .map((player, index) => {
+            // console.log(player.name);
+            if (player.isOut) return getListItem(player, false, index);
+            else if (player.isOut === false)
+              return getCurrentBatsmen(player, index);
+            else <></>;
+          })}
         {/* current batting players */}
         {/* {players.map((player, index) => {
         return player.isOut === false ? (

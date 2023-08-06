@@ -10,12 +10,16 @@ import ToggleButtons from "../../../../../components/toggleButton/ToggleButton";
 import { WICKET_TYPES } from "../../../constants";
 import "./WicketDialog.scss";
 import AutocompleteDropdown from "../../../../../components/autocomplete-dropdown/AutocompleteDropdown";
+import AutoCompleteAsync from "../../autocomplete-async/AutoCompleteAsync";
 
 export default function WicketDialog(props) {
   const {
+    battingTeam,
+    bowlingTeam,
     onClose,
     open,
-    players,
+    excludedBatsmen,
+    // players,
     bowlers = [],
     wicket = "",
     isBatsmenRetire,
@@ -35,7 +39,7 @@ export default function WicketDialog(props) {
   const selectedWicket = wicketTypes.filter((wt) => wt.value === wicket);
   // console.log("hideNewBatsmen", hideNewBatsmen);
   const bowlerItems = bowlers.map((bow) => ({ ...bow, title: bow.name }));
-  const batsmenItems = players.map((bat) => ({ ...bat, title: bat.name }));
+  // const batsmenItems = players.map((bat) => ({ ...bat, title: bat.name }));
   const [wicketType, setWicketType] = React.useState(
     selectedWicket.length > 0 ? selectedWicket[0] : null
   );
@@ -90,9 +94,15 @@ export default function WicketDialog(props) {
             /> */}
 
             {wicketType.value !== WICKET_TYPES.BOWLED && (
-              <AutocompleteDropdown
+              // <AutocompleteDropdown
+              //   id="bowler-ac"
+              //   dropdownOptions={bowlerItems}
+              //   placeholder="Wicket Helped By"
+              //   handleChange={(val) => setWicketHelpedBy(val)}
+              // />
+              <AutoCompleteAsync
                 id="bowler-ac"
-                dropdownOptions={bowlerItems}
+                teamId={bowlingTeam.id}
                 placeholder="Wicket Helped By"
                 handleChange={(val) => setWicketHelpedBy(val)}
               />
@@ -138,12 +148,19 @@ export default function WicketDialog(props) {
             {/* <Typography variant="h6" gutterBottom>
               New Batsmen
             </Typography> */}
-            <AutocompleteDropdown
+            <AutoCompleteAsync
+              id="batsmen-ac"
+              teamId={battingTeam.id}
+              placeholder="New Batsmen"
+              handleChange={(val) => setBatsmen(val)}
+              excludedItems={excludedBatsmen}
+            />
+            {/* <AutocompleteDropdown
               id="batsmen-ac"
               dropdownOptions={batsmenItems}
               placeholder="New Batsmen"
               handleChange={(val) => setBatsmen(val)}
-            />
+            /> */}
             {/* <ToggleButtons
               id="batsmen"
               items={batsmenItems}
@@ -152,6 +169,14 @@ export default function WicketDialog(props) {
             /> */}
           </div>
         )}
+        <Button
+          sx={{ width: "90%" }}
+          variant="outlined"
+          onClick={() => onClose(null)}
+          className="update-button"
+        >
+          Cancel
+        </Button>
         <Button
           sx={{ width: "90%" }}
           variant="contained"

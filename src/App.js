@@ -1,4 +1,5 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import {
   BrowserView,
   MobileView,
@@ -8,7 +9,10 @@ import {
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import BookOnlineIcon from "@mui/icons-material/BookOnline";
 import SportsCricketIcon from "@mui/icons-material/SportsCricket";
-import { useSelector } from "react-redux";
+import LogoutIcon from "@mui/icons-material/Logout";
+import InfoIcon from "@mui/icons-material/Info";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import { useSelector, useDispatch } from "react-redux";
 
 // import firebase from "firebase";
 import "./App.css";
@@ -24,15 +28,36 @@ import FinalScoreboard from "./modules/cricket/components/final-scoreboard/Final
 import ViewMatchList from "./modules/cricket/components/view-match-list/ViewMatchList";
 import BottomNavigationMenu from "./components/bottom-navigation/BottomNavigation";
 import ProgressLoader from "./modules/dashboard/progress-loader/ProgressLoader";
-// import Login from "./components/login/Login";
+import * as genericActions from "./store/actions/dashboard";
+import ClientRegistration from "./modules/dashboard/register/Register";
+import LoginPage from "./modules/dashboard/login/Login";
+import LogoutPage from "./modules/dashboard/logout/Logout";
+import PlayersHome from "./modules/cricket/components/players/Player";
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
   const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const {
     scoreboardEntries,
     scoreboard: { isMatchCompleted },
   } = useSelector((state) => state.cricket);
+
+  const {
+    loginStatus: { success, fail },
+    roles: { isSuperAdmin },
+  } = useSelector((state) => state.dashboard);
+
+  useEffect(() => {
+    const userDetails = sessionStorage.getItem("userDetails");
+    if (userDetails) {
+      dispatch(genericActions.validateLoginSuccess(JSON.parse(userDetails)));
+    } else {
+      navigate("/login");
+    }
+  }, []);
   // const firebaseConfig = {
   //   apiKey: "AIzaSyBiwHjB0-V0ZdxoykRq-U3188bS3KWo3uM",
   //   authDomain: "react-sample-bf33c.firebaseapp.com",
@@ -54,35 +79,53 @@ function App() {
 
   return (
     <div className="App">
-      <BrowserView>
-        <HeaderNavigation></HeaderNavigation>
-      </BrowserView>
+      {success && (
+        <BrowserView>
+          <HeaderNavigation></HeaderNavigation>
+        </BrowserView>
+      )}
       {/* <BrowserRouter> */}
       <div className="routes-section">
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<ClientRegistration />} />
           <Route path="cricket" element={<Cricket />}>
             <Route path="new-match" element={<CreateMatch />} />
             <Route path="matches" element={<ViewMatchList />} />
             <Route path="settings" element={<AdvancedSettings />} />
             <Route path="scoreboard" element={<Scoreboard />} />
             <Route path="finalscore" element={<FinalScoreboard />} />
+            <Route path="players" element={<PlayersHome />} />
           </Route>
           <Route path="shuttle" element={<Shuttle />} />
           <Route path="booking" element={<Booking />} />
+          <Route path="logout" element={<LogoutPage />} />
           {/* <Route path="*" element={<NoPage />} /> */}
         </Routes>
       </div>
-      <MobileView>
-        <BottomNavigationMenu
-          navigationItems={[
-            { label: "Clients", icon: <DashboardIcon />, path: "/" },
-            { label: "Cricket", icon: <SportsCricketIcon />, path: "/cricket" },
-            { label: "Booking", icon: <BookOnlineIcon />, path: "/booking" },
-          ]}
-          unSavedChanges={unSavedChanges}
-        />
-      </MobileView>
+      {success && (
+        <MobileView>
+          <BottomNavigationMenu
+            navigationItems={[
+              {
+                label: isSuperAdmin ? "Clients" : "Info",
+                icon: isSuperAdmin ? <PeopleAltIcon /> : <InfoIcon />,
+                path: "/",
+              },
+              {
+                label: "Cricket",
+                icon: <SportsCricketIcon />,
+                path: "/cricket",
+              },
+              { label: "Booking", icon: <BookOnlineIcon />, path: "/booking" },
+              { label: "Sign Out", icon: <LogoutIcon />, path: "/logout" },
+            ]}
+            currentPath={location.pathname}
+            unSavedChanges={unSavedChanges}
+          />
+        </MobileView>
+      )}
       {/* </BrowserRouter> */}
       {/* <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />

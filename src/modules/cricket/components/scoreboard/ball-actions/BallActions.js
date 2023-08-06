@@ -20,6 +20,7 @@ import Checkbox from "@mui/material/Checkbox";
 
 // import { db } from "../../../../../database/firebase.db";
 import * as cricketActions from "../../../../../store/actions/cricket";
+import * as genericActions from "../../../../../store/actions/dashboard";
 import PlayerDialog from "../../player-dialog/PlayerDialog";
 import WicketDialog from "../wicket-dialog/WicketDialog";
 import NewInningsDialog from "../new-innings-dialog/NewInningsDialog";
@@ -69,6 +70,7 @@ export default function BallActions({ overDetails }) {
   const {
     scoreboardEntries,
     matchDetails,
+    canTriggerSave,
     scoreboard,
     scoreboard: { isFirstInnings, firstInnings, secondInnings },
     matchDetails: {
@@ -110,6 +112,20 @@ export default function BallActions({ overDetails }) {
     setOverBallNO(overBallNum);
   }, [overs]);
 
+  React.useEffect(() => {
+    if (canTriggerSave) {
+      // Trigger save at end of each over
+      // saveAction-false to keep the scoreboard entries
+      dispatch(
+        cricketActions.saveCricketMatch({
+          scoreboard,
+          matchDetails,
+          saveAction: false,
+        })
+      );
+    }
+  }, [canTriggerSave]);
+
   const endMatch = (data) => {
     if (data) {
       setEndDialog(false);
@@ -143,14 +159,21 @@ export default function BallActions({ overDetails }) {
         striker = getPlayerDetails(
           striker,
           secondInnings.team,
-          "secondInnings"
+          "secondInnings",
+          true
         );
         nonStriker = getPlayerDetails(
           nonStriker,
           secondInnings.team,
-          "secondInnings"
+          "secondInnings",
+          true
         );
-        bowler = getPlayerDetails(bowler, firstInnings.team, "firstInnings");
+        bowler = getPlayerDetails(
+          bowler,
+          firstInnings.team,
+          "firstInnings",
+          false
+        );
       }
       dispatch(
         cricketActions.endInnings({
@@ -172,6 +195,7 @@ export default function BallActions({ overDetails }) {
         cricketActions.addCricketPlayer({
           key: bowlerKey,
           value,
+          isBatsmen: false,
           // value: { ...value, isOut: null, isRetire: false },
         })
       );
@@ -189,7 +213,14 @@ export default function BallActions({ overDetails }) {
     }
   };
 
-  const getPlayerDetails = (player, team, inningsKey) => {
+  // addCtach added for newly created player to maintain catched count
+  const getPlayerDetails = (
+    player,
+    team,
+    inningsKey,
+    isBatsmen,
+    addCatch = false
+  ) => {
     const updatedPlayer = player ? omitProps("title", player) : null;
     if (updatedPlayer) {
       if (updatedPlayer.id) return updatedPlayer;
@@ -200,6 +231,8 @@ export default function BallActions({ overDetails }) {
           cricketActions.addCricketPlayer({
             key: inningsKey,
             value: newPlayer,
+            isBatsmen,
+            addCatch,
           })
         );
         return newPlayer;
@@ -208,61 +241,78 @@ export default function BallActions({ overDetails }) {
     return updatedPlayer;
   };
 
-  const handleNewBatsmenClose = ({ wicketType, wicketHelpedBy, batsmen }) => {
-    let newBatsmenStrike = true;
-    if (playersPerTeam === wickets + 1) {
-      // isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
-      isFirstInnings ? setOpenNewInningsDialog(true) : setEndMatchConfirm(true);
-    }
-    if (batsmen || wicketType || wicketHelpedBy) {
-      // setBatsmenDialog(false);
-      // const strikerKey = batsmen1 && batsmen1.isStriker ? "batsmen1" : "batsmen2";
-      // const nonStrikerKey = batsmen1 && batsmen1.isStriker ? "batsmen2" : "batsmen1";
-      const lastBallRun = balls.length > 0 ? balls[balls.length - 1].runs : 0;
-      const overLastBall =
-        balls.length > 0 ? balls[balls.length - 1].overLastBall : false;
-      let batsmenKey =
-        (wicketType && wicketType.value === WICKET_TYPES.RUNOUT_OTHER) ||
-        overLastBall
-          ? nonStrikerKey
-          : strikerKey;
-      newBatsmenStrike = overLastBall ? false : true;
-      if (runout && lastBallRun % 2 === 0) {
-        if (wicketType && wicketType.value === WICKET_TYPES.RUNOUT) {
-          batsmenKey = nonStrikerKey;
-          newBatsmenStrike = false;
-        } else {
-          batsmenKey = strikerKey;
-          newBatsmenStrike = true;
-        }
-      } else if (runout && lastBallRun % 2 > 0) {
-        if (wicketType && wicketType.value === WICKET_TYPES.RUNOUT) {
-          batsmenKey = strikerKey;
-          newBatsmenStrike = true;
-        } else {
-          batsmenKey = nonStrikerKey;
-          newBatsmenStrike = false;
-        }
+  const handleNewBatsmenClose = (response) => {
+    if (response) {
+      const { wicketType, wicketHelpedBy, batsmen } = response;
+      let newBatsmenStrike = true;
+      if (playersPerTeam === wickets + 1) {
+        // isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
+        isFirstInnings
+          ? setOpenNewInningsDialog(true)
+          : setEndMatchConfirm(true);
       }
-      // console.log(playersPerTeam, wickets, playersPerTeam === wickets + 1);
-      dispatch(
-        cricketActions.updateNewBatsmen({
-          inningsKey,
-          innings2Key,
-          batsmenKey,
-          newBatsmen: getPlayerDetails(batsmen, battingTeam, inningsKey),
-          wicketType,
-          wicketHelpedBy: getPlayerDetails(
-            wicketHelpedBy,
-            bowlingTeam,
-            innings2Key
-          ),
-          isBatsmenRetire,
-          newBatsmenStrike,
-        })
-      );
+      if (batsmen || wicketType || wicketHelpedBy) {
+        // setBatsmenDialog(false);
+        // const strikerKey = batsmen1 && batsmen1.isStriker ? "batsmen1" : "batsmen2";
+        // const nonStrikerKey = batsmen1 && batsmen1.isStriker ? "batsmen2" : "batsmen1";
+        const lastBallRun = balls.length > 0 ? balls[balls.length - 1].runs : 0;
+        const overLastBall =
+          balls.length > 0 ? balls[balls.length - 1].overLastBall : false;
+        let batsmenKey =
+          (wicketType && wicketType.value === WICKET_TYPES.RUNOUT_OTHER) ||
+          overLastBall
+            ? nonStrikerKey
+            : strikerKey;
+        newBatsmenStrike = overLastBall ? false : true;
+        if (runout && lastBallRun % 2 === 0) {
+          if (wicketType && wicketType.value === WICKET_TYPES.RUNOUT) {
+            batsmenKey = nonStrikerKey;
+            newBatsmenStrike = false;
+          } else {
+            batsmenKey = strikerKey;
+            newBatsmenStrike = true;
+          }
+        } else if (runout && lastBallRun % 2 > 0) {
+          if (wicketType && wicketType.value === WICKET_TYPES.RUNOUT) {
+            batsmenKey = strikerKey;
+            newBatsmenStrike = true;
+          } else {
+            batsmenKey = nonStrikerKey;
+            newBatsmenStrike = false;
+          }
+        }
+        // console.log(playersPerTeam, wickets, playersPerTeam === wickets + 1);
+        dispatch(
+          cricketActions.updateNewBatsmen({
+            inningsKey,
+            innings2Key,
+            batsmenKey,
+            newBatsmen: getPlayerDetails(
+              batsmen,
+              battingTeam,
+              inningsKey,
+              true
+            ),
+            wicketType,
+            wicketHelpedBy: getPlayerDetails(
+              wicketHelpedBy,
+              bowlingTeam,
+              innings2Key,
+              false,
+              wicketType && wicketType.value === WICKET_TYPES.CAUGHT
+                ? true
+                : false
+            ),
+            isBatsmenRetire,
+            newBatsmenStrike,
+          })
+        );
+        setBatsmenDialog(false);
+        setRunout(false);
+      }
+    } else {
+      dispatch(cricketActions.undoScoreboard());
       setBatsmenDialog(false);
-      setRunout(false);
     }
   };
 
@@ -582,6 +632,7 @@ export default function BallActions({ overDetails }) {
                   variant="contained"
                   color="secondary"
                   onClick={() => {
+                    dispatch(genericActions.switchProgressLoader(true));
                     dispatch(
                       cricketActions.saveCricketMatch({
                         scoreboard,
@@ -608,23 +659,27 @@ export default function BallActions({ overDetails }) {
         <Button size="small">Learn More</Button>
       </CardActions> */}
       </Card>
-      {openDialog && (
+      {openDialog && !batsmenDialog && (
         <PlayerDialog
           team={bowlingInnings?.team}
           open={openDialog}
           onClose={handleClose}
           title={"Select Bowler"}
-          excludedPlayerId={currentBowler?.id}
-          players={bowlingInnings?.players}
+          excludedPlayers={[currentBowler]}
+          // players={bowlingInnings?.players}
         />
       )}
-      {batsmenDialog && !openDialog && (
+      {batsmenDialog && (
         <WicketDialog
-          team={innings?.team}
+          battingTeam={battingTeam}
+          bowlingTeam={bowlingTeam}
           open={batsmenDialog}
           onClose={handleNewBatsmenClose}
           title={"Next Batsmen"}
-          players={innings?.players.filter((player) => player.isOut === null)}
+          excludedBatsmen={innings?.players.filter(
+            (player) => player.isOut != null
+          )}
+          players={innings?.players.filter((player) => player.isOut != null)}
           wicket={runout ? WICKET_TYPES.RUNOUT : WICKET_TYPES.CAUGHT}
           bowlers={bowlingInnings?.players}
           isBatsmenRetire={isBatsmenRetire}
@@ -640,10 +695,13 @@ export default function BallActions({ overDetails }) {
           open={openNewInningsDialog}
           onClose={startNewInnings}
           players={secondInnings?.players.filter(
-            (player) => player.isOut === null
+            (player) => player.isOut != null
           )}
-          bowlers={firstInnings?.players}
+          // bowlers={firstInnings?.players}
           remainingOvers={0}
+          isFirstInnings={isFirstInnings}
+          battingTeam={isFirstInnings ? bowlingTeam : battingTeam}
+          bowlingTeam={isFirstInnings ? battingTeam : bowlingTeam}
         />
       )}
 

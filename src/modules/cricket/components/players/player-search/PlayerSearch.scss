@@ -1,0 +1,44 @@
+.algolia-search-wrapper {
+  padding: 10px;
+  // display: flex;
+  // flex-direction: column;
+  // align-items: flex-end;
+
+  .ais-SearchBox {
+    padding: 10px 0;
+
+    input {
+      background-color: #f2f8f7;
+    }
+  }
+
+  // .search-results {
+  //   padding-top: 20px;
+  //   width: 100%;
+  //   display: flex;
+  //   flex-direction: row;
+  //   justify-content: space-around;
+
+  //   .filter-section {
+  //     padding: 10px;
+  //     width: 25%;
+  //   }
+
+  //   .ais-RefinementList {
+  //   }
+
+  //   .price-range {
+  //     padding-top: 20px;
+  //   }
+
+  //   .ais-Hits {
+  //     // width: 70%;
+  //   }
+
+  //   .ais-Pagination {
+  //     width: 70%;
+  //     padding-top: 10px;
+  //     padding-left: 40%;
+  //   }
+  // }
+}

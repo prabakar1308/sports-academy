@@ -38,6 +38,7 @@ import * as genericActions from "../../../../store/actions/dashboard";
 // } from "firebase/firestore/lite";
 import { useNavigate } from "react-router-dom";
 import ConfirmationDialog from "../../../../components/confirmation-dialog/ConfirmationDialog";
+import { Alert } from "@mui/material";
 
 // function createData(team1, calories, fat, carbs, protein) {
 //   return {
@@ -265,6 +266,11 @@ EnhancedTableHead.propTypes = {
 
 export default function ViewMatchList() {
   const { matches } = useSelector((state) => state.cricket);
+  const {
+    progressLoader,
+    roles: { isSuperAdmin, isAdmin },
+  } = useSelector((state) => state.dashboard);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -332,7 +338,9 @@ export default function ViewMatchList() {
   const handleClick = (event, matchId) => {
     console.log(event, matchId);
     dispatch(cricketActions.setMatchDetails(matchId));
-    navigate("/cricket/scoreboard");
+    isSuperAdmin || isAdmin
+      ? navigate("/cricket/scoreboard")
+      : navigate("/cricket/finalscore");
     // const selectedIndex = selected.indexOf(name);
     // let newSelected = [];
 
@@ -465,6 +473,11 @@ export default function ViewMatchList() {
             </TableBody>
           </Table>
         </TableContainer>
+        {rows.length === 0 && !progressLoader && (
+          <Alert sx={{ justifyContent: "center" }} severity="warning">
+            No Matches recorded!
+          </Alert>
+        )}
         {/* <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"

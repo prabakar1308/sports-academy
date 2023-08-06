@@ -19,7 +19,7 @@ export default function FinalScoreboard() {
   // const navigate = useNavigate();
   // const navigate = useNavigate();
   const {
-    matchDetails: { team1, team2, battingFirst },
+    matchDetails: { team1, team2, battingFirst, overs },
     scoreboard: {
       isFirstInnings,
       firstInnings,
@@ -52,12 +52,16 @@ export default function FinalScoreboard() {
 
   const getTotal = (isFirstInnings) => {
     const innings = isFirstInnings ? firstInnings : secondInnings;
-    const { totalRuns, wickets, balls } = innings;
+    const { totalRuns, wickets, balls, currentBowler } = innings;
+    const bowlingBalls = currentBowler ? currentBowler.bowlingBalls : 0;
     const lastBall = balls && balls.length > 0 ? balls[balls.length - 1] : null;
     let overValue = 0;
     if (lastBall) {
       const { over, overBallNo } = lastBall;
-      overValue = overBallNo === 6 ? over + 1 : `${over}.${overBallNo}`;
+      // WORKAROUND - to fix first ball wide or no ball
+      const updatedOverBallNo =
+        overBallNo === 1 && bowlingBalls % 6 === 0 ? 0 : overBallNo;
+      overValue = overBallNo === 6 ? over + 1 : `${over}.${updatedOverBallNo}`;
     }
     const score = `${totalRuns}-${wickets} (${overValue})`;
     return `${score}`;
@@ -113,6 +117,7 @@ export default function FinalScoreboard() {
                 setDialogDetails({
                   balls: firstInnings.balls,
                   team: firstInnings.team.name,
+                  overs,
                 });
               }}
             />
@@ -167,6 +172,7 @@ export default function FinalScoreboard() {
                   setDialogDetails({
                     balls: secondInnings.balls,
                     team: secondInnings.team.name,
+                    overs,
                   });
                 }}
               />

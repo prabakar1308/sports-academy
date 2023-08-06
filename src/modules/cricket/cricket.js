@@ -8,6 +8,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ScoreboardIcon from "@mui/icons-material/Scoreboard";
+import RefreshIcon from "@mui/icons-material/Refresh";
 // import { setDoc, deleteDoc, doc, Timestamp } from "firebase/firestore/lite";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import ReactToPrint from "react-to-print";
@@ -18,6 +19,8 @@ import AvatarIcon from "../../components/avatar-icon/AvatarIcon";
 import { getRequiredRunDetails } from "./utils";
 import "./cricket.scss";
 import * as cricketActions from "../../store/actions/cricket";
+import * as genericActions from "../../store/actions/dashboard";
+import { updateTeamPlayerScore } from "../../store/reducers/utils";
 // import { updatePlayersFirebase } from "./db-operations";
 
 const Cricket = () => {
@@ -28,7 +31,8 @@ const Cricket = () => {
 
   const {
     matchDetails,
-    matchDetails: { overs, team1Players, team2Players },
+    currentMatchPlayers,
+    matchDetails: { overs },
     scoreboardEntries,
     scoreboard,
     scoreboard: {
@@ -41,6 +45,10 @@ const Cricket = () => {
     },
     unSavedActions,
   } = useSelector((state) => state.cricket);
+
+  const {
+    roles: { isSuperAdmin, isAdmin },
+  } = useSelector((state) => state.dashboard);
 
   const { totalRuns, team, totalBalls, players: players1 } = firstInnings;
   const {
@@ -62,14 +70,15 @@ const Cricket = () => {
     bowlingBalls: currentBowler ? currentBowler.bowlingBalls : 0,
   });
 
+  const createMatch = {
+    title: "New League Match",
+    description: "Manages scoreboard",
+    image: require("../../images/cricket.jpg"),
+    link: "/cricket/new-match",
+    handleClick: () => dispatch(cricketActions.resetMatchDetails()),
+  };
+
   const cardList = [
-    {
-      title: "New League Match",
-      description: "Manages scoreboard",
-      image: require("../../images/cricket.jpg"),
-      link: "/cricket/new-match",
-      handleClick: () => dispatch(cricketActions.resetMatchDetails()),
-    },
     {
       title: "View Matches",
       description: "View the list of matches played",
@@ -81,11 +90,21 @@ const Cricket = () => {
       title: "View Players",
       description: "View player profile",
       image: require("../../images/cricket-teams.jpg"),
-      link: "/cricket/new-match",
+      link: "/cricket/players",
     },
   ];
 
+  if (isSuperAdmin || isAdmin) {
+    cardList.unshift(createMatch);
+  }
+
   React.useEffect(() => {
+    // move to clients list page if client is not selected by super admin
+    // for other users, it will be set during login flow
+    const client = sessionStorage.getItem("client");
+    if (!client) {
+      navigate("/");
+    }
     const unloadCallback = (event) => {
       event.preventDefault();
       event.returnValue = "";
@@ -112,14 +131,27 @@ const Cricket = () => {
         cricketActions.saveCricketMatch({
           scoreboard,
           matchDetails,
+          saveAction: true,
         })
       );
 
       // update players in db
       if (isMatchCompleted) {
+        const { team1Players, team2Players } = updateTeamPlayerScore(
+          scoreboard,
+          matchDetails
+        );
         const players = [...team1Players, ...team2Players];
         // updatePlayersFirebase(players);
-        dispatch(cricketActions.updateMatchPlayers(players));
+        const client = sessionStorage.getItem("client");
+        const algoliaIndex = client ? JSON.parse(client).algoliaIndex : "";
+        dispatch(
+          cricketActions.updateMatchPlayers({
+            players,
+            algoliaIndex,
+            currentMatchPlayers,
+          })
+        );
       }
     } else if (!isFirstInnings && unSavedActions) {
       // when first innings closed manually without balls bowled (set target as penalty runs)
@@ -132,9 +164,22 @@ const Cricket = () => {
       // updateMatch(scoreboard, matchDetails);
     } else if (isMatchCompleted && unSavedActions) {
       // when match closed manually after the save action
+      const { team1Players, team2Players } = updateTeamPlayerScore(
+        scoreboard,
+        matchDetails
+      );
       const players = [...team1Players, ...team2Players];
+
       // updatePlayersFirebase(players);
-      dispatch(cricketActions.updateMatchPlayers(players));
+      const client = sessionStorage.getItem("client");
+      const algoliaIndex = client ? JSON.parse(client).algoliaIndex : "";
+      dispatch(
+        cricketActions.updateMatchPlayers({
+          players,
+          algoliaIndex,
+          currentMatchPlayers,
+        })
+      );
     }
   }, [isFirstInnings, isMatchCompleted]);
 
@@ -144,6 +189,8 @@ const Cricket = () => {
       title = "Advanced Options";
     } else if (location.pathname === "/cricket/new-match") {
       title = "Select Teams";
+    } else if (location.pathname === "/cricket/players") {
+      title = "Players";
     }
     return title;
   };
@@ -259,11 +306,25 @@ const Cricket = () => {
               />
             )} */}
 
-            {!isMatchCompleted && (
+            {!isMatchCompleted && (isSuperAdmin || isAdmin) && (
               <ListItemAvatar>
                 <AvatarIcon
                   icon={<ScoreboardIcon />}
                   handleClick={() => navigatePath()}
+                  tooltip="Update Score"
+                />
+              </ListItemAvatar>
+            )}
+            {!isMatchCompleted && !(isSuperAdmin || isAdmin) && (
+              <ListItemAvatar>
+                <AvatarIcon
+                  icon={<RefreshIcon />}
+                  handleClick={() => {
+                    dispatch(genericActions.switchProgressLoader(true));
+                    dispatch(
+                      cricketActions.refreshScoreboard(scoreboard.matchId)
+                    );
+                  }}
                   tooltip="Update Score"
                 />
               </ListItemAvatar>
@@ -281,7 +342,11 @@ const Cricket = () => {
           </ListItem>
         </List>
       ) : (
-        <Typography className="cric-header" variant="h6">
+        <Typography
+          className="cric-header"
+          variant="h6"
+          sx={{ backgroundColor: "#d0e6e7" }}
+        >
           {getHeader()}
         </Typography>
       )}

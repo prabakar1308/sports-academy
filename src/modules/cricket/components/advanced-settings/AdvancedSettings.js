@@ -11,19 +11,11 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { v4 as uuid } from "uuid";
-// import { Timestamp } from "firebase/firestore/lite";
 
-// import { db } from "../../../../database/firebase.db";
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  setDoc,
-  doc,
-} from "firebase/firestore/lite";
 import * as cricketActions from "../../../../store/actions/cricket";
+import * as genericActions from "../../../../store/actions/dashboard";
 import PlayerDialog from "../player-dialog/PlayerDialog";
-import { setPlayerForCurrentMatch } from "../../utils";
+import { getBattingOrder, setPlayerForCurrentMatch } from "../../utils";
 
 import "./AdvancedSettings.scss";
 
@@ -175,6 +167,7 @@ const AdvancedSettings = () => {
                 ? false
                 : null,
             isRetire: false,
+            battingOrder: getBattingOrder(striker.id, nonStriker.id, player.id),
           })),
           batsmen1: { ...setPlayerForCurrentMatch(striker), isStriker: true },
           batsmen2: {
@@ -222,6 +215,7 @@ const AdvancedSettings = () => {
       };
       // dispatch(cricketActions.updateScoreboardFields(fields));
       // createMatch(scoreboard, matchDetails, fields);
+      dispatch(genericActions.switchProgressLoader(true));
       dispatch(
         cricketActions.saveCricketMatch({
           scoreboard,
@@ -383,7 +377,7 @@ const AdvancedSettings = () => {
             open={open}
             onClose={handleClose}
             title={"Available Players"}
-            players={isFirstTeam() ? team1Players : team2Players}
+            // players={isFirstTeam() ? team1Players : team2Players}
           />
         )}
       </Stack>

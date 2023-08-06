@@ -10,6 +10,16 @@ export const omitProps = (key, obj) => {
   return rest;
 };
 
+export function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+export const getBattingOrder = (strikerId, nonStrikerId, playerId) => {
+  if (strikerId === playerId) return 1;
+  else if (nonStrikerId === playerId) return 2;
+  return 99;
+};
+
 export const getRequiredRunDetails = ({
   balls,
   overs,
@@ -78,6 +88,8 @@ export const getNewPlayerDetails = (name, teamId) => {
     notOuts: 0,
     overs: 0,
     maidens: 0,
+    wides: 0,
+    noBalls: 0,
     // econRate: 0, //
   };
 };
