@@ -13,17 +13,45 @@ const API =
 
 export function* validateLoginPinSaga(action) {
   try {
-    const pin = action.payload;
-    const res = yield axios.get(`${API}/validate/login/${pin}`);
+    const { pin, phone } = action.payload;
+    const res = yield axios.post(`${API}/validate/login`, {
+      pin,
+      phone,
+    });
     if (res.status === 200)
       yield put(genericActions.validateLoginSuccess(res.data));
+    else yield put(genericActions.validateLoginError());
   } catch (e) {
-    // handle error
+    yield put(genericActions.validateLoginError());
+  }
+}
+
+export function* registerClientSaga(action) {
+  try {
+    const res = yield axios.post(`${API}/client/create`, action.payload);
+    if (res.status === 200)
+      yield put(genericActions.registerClientSuccess(res.data));
+    else yield put(genericActions.registerClientError());
+  } catch (e) {
+    yield put(genericActions.registerClientError());
+  }
+}
+
+export function* deleteClientSaga(action) {
+  try {
+    const res = yield axios.delete(`${API}/client/delete/${action.payload}`);
+    if (res.status === 200)
+      yield put(genericActions.deleteClientSuccess(action.payload));
+    else yield put(genericActions.deleteClientError());
+  } catch (e) {
+    yield put(genericActions.deleteClientError());
   }
 }
 
 function* getGenericWatcher() {
   yield takeLatest(genericActions.VALIDATE_LOGIN, validateLoginPinSaga);
+  yield takeLatest(genericActions.REGISTER_CLIENT, registerClientSaga);
+  yield takeLatest(genericActions.DELETE_CLIENT, deleteClientSaga);
 }
 
 export const genericWatchers = [getGenericWatcher];

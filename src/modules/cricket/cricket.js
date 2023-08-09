@@ -352,7 +352,7 @@ const Cricket = () => {
       )}
 
       {location.pathname === "/cricket" && (
-        <Grid sx={{ flexGrow: 2 }} container spacing={2}>
+        <Grid sx={{ flexGrow: 2, marginTop: 0 }} container spacing={2}>
           <Grid item xs={12}>
             <Grid container justifyContent="center" spacing={2}>
               {cardList.map((value, index) => (

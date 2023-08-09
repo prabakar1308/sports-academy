@@ -54,7 +54,7 @@ function App() {
     const userDetails = sessionStorage.getItem("userDetails");
     if (userDetails) {
       dispatch(genericActions.validateLoginSuccess(JSON.parse(userDetails)));
-    } else {
+    } else if (location.pathname != "/register") {
       navigate("/login");
     }
   }, []);
