@@ -124,6 +124,7 @@ export default function LoginPage({ handleLogin }) {
                 label="Enter phone number"
                 name="phone"
                 error={fail && disableBtn}
+                autoComplete="tel"
                 // helperText={fail && disableBtn ? fail : ""}
                 // autoComplete="email"
                 autoFocus

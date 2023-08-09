@@ -22,7 +22,11 @@ const dashboardReducer = (state = initialState, action) => {
         ...state,
         progressLoader: action.payload,
       };
-
+    case genericActions.CLEAR_REGISTER:
+      return {
+        ...state,
+        clientRegistered: false,
+      };
     case genericActions.VALIDATE_LOGIN: {
       return {
         ...state,
@@ -83,6 +87,7 @@ const dashboardReducer = (state = initialState, action) => {
     case genericActions.REGISTER_CLIENT_SUCCESS:
       return {
         ...state,
+        progressLoader: false,
         clientRegistered: true,
       };
     case genericActions.REGISTER_CLIENT_ERROR: {
@@ -98,12 +103,24 @@ const dashboardReducer = (state = initialState, action) => {
         progressLoader: true,
       };
     }
-    case genericActions.DELETE_CLIENT_SUCCESS:
+    case genericActions.DELETE_CLIENT_SUCCESS: {
+      const clients = [...state.clients].filter(
+        (cli) => cli.id !== action.payload
+      );
+      sessionStorage.setItem(
+        "userDetails",
+        JSON.stringify({
+          isAdmin: true,
+          isSuperAdmin: true,
+          data: clients,
+        })
+      );
       return {
         ...state,
-        clients: [...state.clients].filter((cli) => cli.id !== action.payload),
+        progressLoader: false,
+        clients,
       };
-
+    }
     case genericActions.DELETE_CLIENT_ERROR: {
       return {
         ...state,

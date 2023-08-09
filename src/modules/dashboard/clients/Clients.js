@@ -41,8 +41,8 @@ export default function Clients() {
   }
 
   const handleDelete = () => {
-    setClientId("");
     dispatch(genericActions.deleteClient(clientId));
+    setClientId("");
   };
 
   return (
@@ -104,6 +104,11 @@ export default function Clients() {
                         pin: <strong>{client.userPin}</strong>
                         <br />
                         Algolia Index: <strong>{client.algoliaIndex}</strong>
+                      </Typography>
+                    )}
+                    {isAdmin && !isSuperAdmin && (
+                      <Typography variant="caption">
+                        User pin: <strong>{client.userPin}</strong>
                       </Typography>
                     )}
                   </CardContent>

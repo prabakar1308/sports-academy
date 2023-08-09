@@ -34,6 +34,7 @@ import LoginPage from "./modules/dashboard/login/Login";
 import LogoutPage from "./modules/dashboard/logout/Logout";
 import PlayersHome from "./modules/cricket/components/players/Player";
 import ProtectedRoute from "./ProtectedRoute";
+import axios from "axios";
 
 function App() {
   const location = useLocation();
@@ -51,6 +52,7 @@ function App() {
   } = useSelector((state) => state.dashboard);
 
   useEffect(() => {
+    initiateApi();
     const userDetails = sessionStorage.getItem("userDetails");
     if (userDetails) {
       dispatch(genericActions.validateLoginSuccess(JSON.parse(userDetails)));
@@ -58,6 +60,13 @@ function App() {
       navigate("/login");
     }
   }, []);
+
+  const initiateApi = async () => {
+    const API =
+      process.env.REACT_APP_API_URL ||
+      "https://nsa-academy-api-dev.onrender.com";
+    await axios.get(`${API}`);
+  };
   // const firebaseConfig = {
   //   apiKey: "AIzaSyBiwHjB0-V0ZdxoykRq-U3188bS3KWo3uM",
   //   authDomain: "react-sample-bf33c.firebaseapp.com",

@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuid } from "uuid";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -13,7 +13,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { CircularProgress } from "@mui/material";
+import { Alert, CircularProgress, Snackbar } from "@mui/material";
 
 import * as genericActions from "../../../store/actions/dashboard";
 
@@ -38,6 +38,9 @@ function Copyright(props) {
 const theme = createTheme();
 
 export default function ClientRegistration() {
+  const { clientRegistered } = useSelector((state) => state.dashboard);
+
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [formData, setFormData] = React.useState({
     phone: "",
@@ -58,10 +61,28 @@ export default function ClientRegistration() {
     userPin: false,
   });
 
-  const handleText = (text) => {
+  React.useEffect(() => {
+    if (clientRegistered) {
+      setTimeout(() => {
+        setFormData({
+          phone: "",
+          clientName: "",
+          pin: "",
+          userPin: "",
+        });
+        navigate("/login");
+      }, 2500);
+    }
+  }, [clientRegistered]);
+
+  React.useEffect(() => {
+    return () => dispatch(genericActions.clearRegister());
+  }, []);
+
+  const handleText = (text, phone) => {
     let tx = text.trim().toLowerCase().replaceAll(/\s/g, "_");
-    const clientId = `${tx}_${parseInt(Math.random() * 1000)}`;
-    const algoliaIndex = `${tx}_players`;
+    const clientId = `${tx}_${phone}`;
+    const algoliaIndex = `${clientId}_players`;
     return { clientId, algoliaIndex };
   };
   const handleSubmit = (event) => {
@@ -83,7 +104,7 @@ export default function ClientRegistration() {
       !pinError &&
       !userPinError
     ) {
-      const { clientId, algoliaIndex } = handleText(clientName);
+      const { clientId, algoliaIndex } = handleText(clientName, phone);
       const data = {
         phone,
         clientName,
@@ -314,6 +335,23 @@ export default function ClientRegistration() {
           </Box>
         </Box>
         <Copyright sx={{ mt: 5 }} />
+        {
+          <Snackbar
+            open={clientRegistered}
+            autoHideDuration={2000}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            // onClose={handleClose}
+          >
+            <Alert
+              // onClose={handleClose}
+              severity="success"
+              sx={{ width: "100%" }}
+              variant="filled"
+            >
+              Registered Successfully!
+            </Alert>
+          </Snackbar>
+        }
       </Container>
     </ThemeProvider>
   );

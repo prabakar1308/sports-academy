@@ -1,4 +1,5 @@
 export const SWITCH_LOADER = "[generic] SWITCH_LOADER";
+export const CLEAR_REGISTER = "[generic] CLEAR_REGISTER";
 export const VALIDATE_LOGIN = "[generic] VALIDATE_LOGIN";
 export const VALIDATE_LOGIN_SUCCESS = "[generic] VALIDATE_LOGIN_SUCCESS";
 export const VALIDATE_LOGIN_ERROR = "[generic] VALIDATE_LOGIN_ERROR";
@@ -14,6 +15,12 @@ export const switchProgressLoader = (status) => {
   return {
     type: SWITCH_LOADER,
     payload: status,
+  };
+};
+
+export const clearRegister = () => {
+  return {
+    type: CLEAR_REGISTER,
   };
 };
 
