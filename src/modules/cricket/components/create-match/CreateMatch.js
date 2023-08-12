@@ -38,8 +38,8 @@ const CreateMatch = () => {
 
   React.useEffect(() => {
     // FB - get teams
-    const client = JSON.parse(sessionStorage.getItem("client"));
-    dispatch(cricketActions.getCricketTeams(client));
+    // const client = JSON.parse(sessionStorage.getItem("client"));
+    // dispatch(cricketActions.getCricketTeams(client));
     // const q = query(
     //   collection(db, "teams"),
     //   where("clientId", "==", client ? client.clientId : 0),

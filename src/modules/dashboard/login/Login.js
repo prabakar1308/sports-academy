@@ -1,19 +1,17 @@
 import * as React from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+
 import * as genericActions from "../../../store/actions/dashboard";
 
 function Copyright(props) {
@@ -25,10 +23,7 @@ function Copyright(props) {
       {...props}
     >
       {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
+      <Link to="/cricket">Your Website</Link> {new Date().getFullYear()}
       {"."}
     </Typography>
   );
@@ -42,6 +37,7 @@ export default function LoginPage({ handleLogin }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [pin, setPin] = React.useState("");
+  const [phone, setPhone] = React.useState("");
   const [disableBtn, setDisableBtn] = React.useState(false);
   const {
     loginStatus: { success, fail },
@@ -71,7 +67,7 @@ export default function LoginPage({ handleLogin }) {
     event.preventDefault();
     // const data = new FormData(event.currentTarget);
     // handleLogin(data.get("pin"));
-    dispatch(genericActions.validateLogin(pin));
+    dispatch(genericActions.validateLogin({ pin, phone }));
   };
 
   return (
@@ -119,6 +115,27 @@ export default function LoginPage({ handleLogin }) {
               sx={{ mt: 1 }}
             >
               <TextField
+                value={phone}
+                type="number"
+                margin="normal"
+                required
+                fullWidth
+                id="phone"
+                label="Enter phone number"
+                name="phone"
+                error={fail && disableBtn}
+                autoComplete="tel"
+                // helperText={fail && disableBtn ? fail : ""}
+                // autoComplete="email"
+                autoFocus
+                onChange={(event) => {
+                  setDisableBtn(true);
+                  setPhone(event.target.value);
+                  if (event.target.value.trim().length > 0)
+                    setDisableBtn(false);
+                }}
+              />
+              <TextField
                 value={pin}
                 type="number"
                 margin="normal"
@@ -128,13 +145,7 @@ export default function LoginPage({ handleLogin }) {
                 label="Enter a pin"
                 name="pin"
                 error={fail && disableBtn}
-                helperText={
-                  fail && disableBtn
-                    ? "Invalid Pin. Please check with admin!"
-                    : ""
-                }
-                // autoComplete="email"
-                autoFocus
+                helperText={fail && disableBtn ? fail : ""}
                 onChange={(event) => {
                   setDisableBtn(true);
                   setPin(event.target.value);
@@ -142,30 +153,6 @@ export default function LoginPage({ handleLogin }) {
                     setDisableBtn(false);
                 }}
               />
-              {/* <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                autoFocus
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-              /> */}
-              {/* <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              /> */}
               <Button
                 disabled={disableBtn}
                 type="submit"
@@ -182,9 +169,7 @@ export default function LoginPage({ handleLogin }) {
                   </Link>
                 </Grid> */}
                 <Grid item>
-                  <Link href="/register" variant="body2">
-                    {"Don't have an account? Sign Up"}
-                  </Link>
+                  <Link to="/register">{"Don't have an account? Sign Up"}</Link>
                 </Grid>
               </Grid>
               <Copyright sx={{ mt: 5 }} />

@@ -1,6 +1,13 @@
 .player-details-wrapper {
   padding: 5px 0;
 
+  .MuiAccordionSummary-content.Mui-expanded {
+    margin: 6px 0;
+  }
+
+  .MuiAccordionSummary-content {
+    margin: 8px 0;
+  }
   .MuiAccordionSummary-expandIconWrapper {
     color: white;
   }

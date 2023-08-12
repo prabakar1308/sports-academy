@@ -5,6 +5,22 @@ import Stack from "@mui/material/Stack";
 import { v4 as uuid } from "uuid";
 import { isMobile } from "react-device-detect";
 
+export const calcBowAverage = ({ wickets, bowlingRuns }) => {
+  if (wickets > 0 && bowlingRuns > 0) {
+    const avg = bowlingRuns / wickets;
+    return Number.isInteger(avg) ? avg : parseFloat(avg).toFixed(2);
+  }
+  return "-";
+};
+
+export const calcBatAverage = ({ outs, runs }) => {
+  if (runs > 0 && outs > 0) {
+    const avg = runs / outs;
+    return Number.isInteger(avg) ? avg : parseFloat(avg).toFixed(2);
+  }
+  return "-";
+};
+
 export const omitProps = (key, obj) => {
   const { [key]: omitted, ...rest } = obj;
   return rest;
@@ -90,6 +106,8 @@ export const getNewPlayerDetails = (name, teamId) => {
     maidens: 0,
     wides: 0,
     noBalls: 0,
+    sixesConceded: 0,
+    foursConceded: 0,
     // econRate: 0, //
   };
 };
@@ -109,6 +127,10 @@ export const setPlayerForCurrentMatch = (player) => {
     bowlingRuns: 0,
     overs: 0,
     maidens: 0,
+    wides: 0,
+    noBalls: 0,
+    sixesConceded: 0,
+    foursConceded: 0,
   };
 };
 

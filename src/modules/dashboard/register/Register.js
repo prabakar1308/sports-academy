@@ -1,17 +1,21 @@
 import * as React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { v4 as uuid } from "uuid";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Alert, CircularProgress, Snackbar } from "@mui/material";
+
+import * as genericActions from "../../../store/actions/dashboard";
 
 function Copyright(props) {
   return (
@@ -22,7 +26,7 @@ function Copyright(props) {
       {...props}
     >
       {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
+      <Link color="inherit" to="/cricket">
         Your Website
       </Link>{" "}
       {new Date().getFullYear()}
@@ -34,13 +38,147 @@ function Copyright(props) {
 const theme = createTheme();
 
 export default function ClientRegistration() {
+  const { clientRegistered } = useSelector((state) => state.dashboard);
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [formData, setFormData] = React.useState({
+    phone: "",
+    clientName: "",
+    pin: "",
+    userPin: "",
+  });
+  const [formError, setFormError] = React.useState({
+    phone: "",
+    clientName: "",
+    pin: "",
+    userPin: "",
+  });
+  const [formLoading, setFormLoading] = React.useState({
+    phone: false,
+    clientName: false,
+    pin: false,
+    userPin: false,
+  });
+
+  React.useEffect(() => {
+    if (clientRegistered) {
+      setTimeout(() => {
+        setFormData({
+          phone: "",
+          clientName: "",
+          pin: "",
+          userPin: "",
+        });
+        navigate("/login");
+      }, 2500);
+    }
+  }, [clientRegistered]);
+
+  React.useEffect(() => {
+    return () => dispatch(genericActions.clearRegister());
+  }, []);
+
+  const handleText = (text, phone) => {
+    let tx = text.trim().toLowerCase().replaceAll(/\s/g, "_");
+    const clientId = `${tx}_${phone}`;
+    const algoliaIndex = `${clientId}_players`;
+    return { clientId, algoliaIndex };
+  };
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+
+    const { phone, clientName, pin, userPin } = formData;
+    const phoneError = handleLocalValidation("phone", phone);
+    const nameError = handleLocalValidation("clientName", clientName);
+    const pinError = handleLocalValidation("pin", pin);
+    const userPinError = handleLocalValidation("userPin", userPin);
+
+    if (
+      !formError.phone &&
+      !formError.clientName &&
+      !formError.pin &&
+      !formError.userPin &&
+      !phoneError &&
+      !nameError &&
+      !pinError &&
+      !userPinError
+    ) {
+      const { clientId, algoliaIndex } = handleText(clientName, phone);
+      const data = {
+        phone,
+        clientName,
+        pin,
+        userPin,
+        validity: Date.parse(new Date("12/31/2023")) / 1000,
+        clientId,
+        algoliaIndex,
+        id: uuid(),
+        status: "approved",
+      };
+      dispatch(genericActions.registerClient(data));
+    }
+  };
+
+  const handleChange = (value, key) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [key]: value,
+    }));
+    setFormError((prevState) => ({
+      ...prevState,
+      [key]: "",
+    }));
+  };
+
+  const handleLocalValidation = (key, value) => {
+    let error = false;
+    if (value.trim() === "") {
+      setFormError((prevError) => ({
+        ...prevError,
+        [key]: "This field is required!",
+      }));
+      error = true;
+    } else if (key === "phone" && !/^[6789]\d{9}$/.test(value)) {
+      setFormError((prevError) => ({
+        ...prevError,
+        [key]: "This field is not valid!",
+      }));
+      error = true;
+    }
+    return error;
+  };
+
+  const handleValidationAsync = async (event, key) => {
+    event.preventDefault();
+    const value = event.target.value;
+    const error = handleLocalValidation(key, value);
+    if (!error) {
+      const API =
+        process.env.REACT_APP_API_URL ||
+        "https://nsa-academy-api-dev.onrender.com";
+      setFormLoading((prev) => ({
+        ...prev,
+        [key]: true,
+      }));
+      const response = await axios.post(`${API}/register/validate`, {
+        key,
+        value,
+      });
+      if (response && response.status === 200) {
+        if (response.data) {
+          setFormError((prevError) => ({
+            ...prevError,
+            [key]: response.data.valid ? "" : `${key} is already exists!`,
+          }));
+
+          setFormLoading((prev) => ({
+            ...prev,
+            [key]: false,
+          }));
+        }
+      }
+    }
   };
 
   return (
@@ -65,57 +203,111 @@ export default function ClientRegistration() {
             component="form"
             noValidate
             onSubmit={handleSubmit}
-            sx={{ mt: 3 }}
+            sx={{ mt: 3, gap: 2 }}
           >
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  value={formData.phone}
+                  type="number"
+                  error={formError.phone}
+                  helperText={formError.phone}
+                  name="phoneNumber"
+                  required
+                  fullWidth
+                  size="small"
+                  id="phoneNumber"
+                  label="Mobile Number"
+                  onChange={(e) => handleChange(e.target.value, "phone")}
+                  onBlur={(e) => handleValidationAsync(e, "phone")}
+                  InputProps={{
+                    readOnly: formLoading.phone,
+                    endAdornment: (
+                      <React.Fragment>
+                        {formLoading.phone ? (
+                          <CircularProgress color="inherit" size={20} />
+                        ) : null}
+                      </React.Fragment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  value={formData.clientName}
+                  type="text"
+                  error={formError.clientName}
+                  helperText={formError.clientName}
+                  name="clientName"
+                  required
+                  fullWidth
+                  size="small"
+                  id="clientName"
+                  label="Club Name"
+                  onChange={(e) => handleChange(e.target.value, "clientName")}
+                  // onBlur={(e) => handleValidationAsync(e, "clientName")}
+                  // InputProps={{
+                  //   readOnly: formLoading.clientName,
+                  //   endAdornment: (
+                  //     <React.Fragment>
+                  //       {formLoading.clientName ? (
+                  //         <CircularProgress color="inherit" size={20} />
+                  //       ) : null}
+                  //     </React.Fragment>
+                  //   ),
+                  // }}
+                />
+              </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
-                  autoComplete="given-name"
-                  name="firstName"
+                  value={formData.pin}
+                  type="number"
+                  error={formError.pin}
+                  helperText={formError.pin}
                   required
                   fullWidth
-                  id="firstName"
-                  label="First Name"
-                  autoFocus
+                  size="small"
+                  id="pin"
+                  label="Admin Pin"
+                  name="pin"
+                  onChange={(e) => handleChange(e.target.value, "pin")}
+                  // onBlur={(e) => handleValidationAsync(e, "pin")}
+                  // InputProps={{
+                  //   readOnly: formLoading.pin,
+                  //   endAdornment: (
+                  //     <React.Fragment>
+                  //       {formLoading.pin ? (
+                  //         <CircularProgress color="inherit" size={20} />
+                  //       ) : null}
+                  //     </React.Fragment>
+                  //   ),
+                  // }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  value={formData.userPin}
+                  type="number"
+                  error={formError.userPin}
+                  helperText={formError.userPin}
                   required
                   fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox value="allowExtraEmails" color="primary" />
-                  }
-                  label="I want to receive inspiration, marketing promotions and updates via email."
+                  size="small"
+                  id="userPin"
+                  label="User Pin"
+                  name="userPin"
+                  onChange={(e) => handleChange(e.target.value, "userPin")}
+                  // onBlur={(e) => handleValidationAsync(e, "userPin")}
+                  // InputProps={{
+                  //   readOnly: formLoading.userPin,
+                  //   endAdornment: (
+                  //     <React.Fragment>
+                  //       {formLoading.userPin ? (
+                  //         <CircularProgress color="inherit" size={20} />
+                  //       ) : null}
+                  //     </React.Fragment>
+                  //   ),
+                  // }}
                 />
               </Grid>
             </Grid>
@@ -124,12 +316,18 @@ export default function ClientRegistration() {
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              disabled={
+                formLoading.clientName ||
+                formLoading.phone ||
+                formLoading.pin ||
+                formLoading.userPin
+              }
             >
               Sign Up
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="/login" variant="body2">
+                <Link to="/login" variant="body2">
                   Already have an account? Sign in
                 </Link>
               </Grid>
@@ -137,6 +335,23 @@ export default function ClientRegistration() {
           </Box>
         </Box>
         <Copyright sx={{ mt: 5 }} />
+        {
+          <Snackbar
+            open={clientRegistered}
+            autoHideDuration={2000}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            // onClose={handleClose}
+          >
+            <Alert
+              // onClose={handleClose}
+              severity="success"
+              sx={{ width: "100%" }}
+              variant="filled"
+            >
+              Registered Successfully!
+            </Alert>
+          </Snackbar>
+        }
       </Container>
     </ThemeProvider>
   );

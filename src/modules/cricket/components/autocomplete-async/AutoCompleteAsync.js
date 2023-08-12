@@ -33,14 +33,16 @@ export default function AutoCompleteAsync({
       if (teamId) {
         const response = await axios.get(`${API}/cricket/getPlayers/${teamId}`);
         if (active && response && response.status === 200) {
-          setOptions(
-            [...response.data].map((pl) => ({
-              ...setPlayerForCurrentMatch(pl),
-              title: pl.name,
-            }))
-          );
+          if (response.data && response.data.length > 0) {
+            setOptions(
+              [...response.data].map((pl) => ({
+                ...setPlayerForCurrentMatch(pl),
+                title: pl.name,
+              }))
+            );
+          } else setOptions([{ id: -1, title: "No Players Available" }]);
         } else {
-          setOptions([{ id: -1, title: "No Players Available" }]);
+          setOptions([{ id: -1, title: "Network Error" }]);
         }
       } else {
         const client = JSON.parse(sessionStorage.getItem("client"));
@@ -48,14 +50,16 @@ export default function AutoCompleteAsync({
           `${API}/cricket/getAllPlayers/${client ? client.clientId : 0}`
         );
         if (active && response && response.status === 200) {
-          setOptions(
-            [...response.data].map((pl) => ({
-              ...pl,
-              title: pl.name,
-            }))
-          );
+          if (response.data && response.data.length > 0) {
+            setOptions(
+              [...response.data].map((pl) => ({
+                ...pl,
+                title: pl.name,
+              }))
+            );
+          } else setOptions([{ id: -1, title: "No Players Available" }]);
         } else {
-          setOptions([{ id: -1, title: "No Players Available" }]);
+          setOptions([{ id: -1, title: "Network Error" }]);
         }
       }
     })();
@@ -91,7 +95,10 @@ export default function AutoCompleteAsync({
         //   excludedItems,
         //   excludedItems.filter((item) => item.id === option.id).length > 0
         // );
-        return excludedItems.filter((item) => item.id === option.id).length > 0;
+        return (
+          excludedItems.filter((item) => item.id === option.id).length > 0 ||
+          option.id === -1
+        );
       }}
       isOptionEqualToValue={(option, value) => option.id === value.id}
       getOptionLabel={(option) => {
@@ -134,11 +141,18 @@ export default function AutoCompleteAsync({
         const isExisting = options.some(
           (option) => inputValue === option.title
         );
-        if (inputValue !== "" && !isExisting && teamId) {
-          filtered.push({
-            inputValue,
-            title: `Add "${inputValue}"`,
-          });
+        if (inputValue !== "" && !isExisting) {
+          if (teamId) {
+            filtered.push({
+              inputValue,
+              title: `Add "${inputValue}"`,
+            });
+          } else {
+            filtered.push({
+              id: -1,
+              title: "No Players Available",
+            });
+          }
         }
 
         return filtered;

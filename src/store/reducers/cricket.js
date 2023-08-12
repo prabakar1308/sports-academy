@@ -52,6 +52,7 @@ import {
 
 const initialState = {
   teams: [],
+  players: [], //used for players tab
   matches: [],
   // to trigger save at the end of each over
   canTriggerSave: false,
@@ -194,6 +195,7 @@ const cricketReducer = (state = initialState, action) => {
       return {
         ...state,
         ...initialState,
+        teams: state.teams, // not to reset teams
       };
     case cricketActions.UPDATE_SCOREBOARD_FIELDS: {
       const scoreboard = {
@@ -431,6 +433,12 @@ const cricketReducer = (state = initialState, action) => {
         const noBallsCount = innings.currentBowler.noBalls
           ? innings.currentBowler.noBalls + noBalls
           : noBalls;
+        const sixesConcededCount = innings.currentBowler.sixesConceded
+          ? innings.currentBowler.sixesConceded + sixesCount
+          : sixesCount;
+        const foursConcededCount = innings.currentBowler.foursConceded
+          ? innings.currentBowler.foursConceded + foursCount
+          : foursCount;
 
         const strikerUpdate =
           (bValue.runs % 2 === 0 && !bValue.overLastBall && !bValue.runout) ||
@@ -456,6 +464,8 @@ const cricketReducer = (state = initialState, action) => {
             wickets: bowlingWickets,
             wides: widesCount,
             noBalls: noBallsCount,
+            sixesConceded: sixesConcededCount,
+            foursConceded: foursConcededCount,
           },
           [strikerKey]: {
             ...innings[strikerKey],
@@ -824,6 +834,10 @@ const cricketReducer = (state = initialState, action) => {
     }
     case cricketActions.RESET_SAVE_STATUS: {
       return { ...state, canTriggerSave: false };
+    }
+
+    case cricketActions.GET_PLAYERS_BY_CLIENT_SUCCESS: {
+      return { ...state, players: action.payload };
     }
     default:
       return state;

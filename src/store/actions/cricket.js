@@ -5,6 +5,9 @@ export const ADD_CRICKET_TEAM_SUCCESS = "[cricket] ADD_CRICKET_TEAM_SUCCESS";
 export const CREATE_PLAYER_BEFORE_START =
   "[cricket] CREATE_PLAYER_BEFORE_START";
 export const GET_PLAYERS_BY_TEAM = "[cricket] GET_PLAYERS_BY_TEAM";
+export const GET_PLAYERS_BY_CLIENT = "[cricket] GET_PLAYERS_BY_CLIENT";
+export const GET_PLAYERS_BY_CLIENT_SUCCESS =
+  "[cricket] GET_PLAYERS_BY_CLIENT_SUCCESS";
 
 export const UPDATE_MATCH_DETAILS = "[cricket] UPDATE_MATCH_DETAILS";
 export const UPDATE_CRICKET_FIELDS = "[cricket] UPDATE_CRICKET_FIELDS";
@@ -56,6 +59,20 @@ export const getCricketTeamsSuccess = (teams) => {
 export const getPlayersByTeam = (data) => {
   return {
     type: GET_PLAYERS_BY_TEAM,
+    payload: data,
+  };
+};
+
+export const getPlayersByClient = (data) => {
+  return {
+    type: GET_PLAYERS_BY_CLIENT,
+    payload: data,
+  };
+};
+
+export const getPlayersByClientSuccess = (data) => {
+  return {
+    type: GET_PLAYERS_BY_CLIENT_SUCCESS,
     payload: data,
   };
 };

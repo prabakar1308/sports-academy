@@ -2,10 +2,13 @@ import * as React from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
-import { createTheme, ThemeProvider, styled } from "@mui/material/styles";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { styled } from "@mui/material/styles";
+
 import AutoCompleteAsync from "../../autocomplete-async/AutoCompleteAsync";
 import "./PlayerStats.scss";
-import { Stack, Typography } from "@mui/material";
+import { calcBatAverage, calcBowAverage } from "../../../utils";
 
 const Item = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
@@ -76,11 +79,95 @@ export default function PlayerStats() {
     );
   };
 
+  // const calcBowAverage = ({ wickets, bowlingRuns }) => {
+  //   if (wickets > 0 && bowlingRuns > 0) {
+  //     const avg = bowlingRuns / wickets;
+  //     return Number.isInteger(avg) ? avg : parseFloat(avg).toFixed(2);
+  //   }
+  //   return "-";
+  // };
+
+  // const calcBatAverage = ({ outs, runs }) => {
+  //   if (runs > 0 && outs > 0) {
+  //     const avg = runs / outs;
+  //     return Number.isInteger(avg) ? avg : parseFloat(avg).toFixed(2);
+  //   }
+  //   return "-";
+  // };
+
+  const calcBestBowling = ({ bestBowlingWickets, bestBowlingRuns }) => {
+    if (bestBowlingWickets > 0)
+      return `${bestBowlingWickets}/${bestBowlingRuns}`;
+    return "-";
+  };
+
+  const calcStrikeRate = ({ runs, balls }) => {
+    if (runs > 0 && balls > 0) {
+      const sr = (runs * 100) / balls;
+      return Number.isInteger(sr) ? sr : parseFloat(sr).toFixed(2);
+    }
+    return "-";
+  };
+
+  const calcEconRate = ({ bowlingRuns, bowlingBalls }) => {
+    if (bowlingBalls > 0) {
+      const er = (bowlingRuns / bowlingBalls) * 6;
+      return Number.isInteger(er) ? er : parseFloat(er).toFixed(2);
+    }
+    return "-";
+  };
+
+  const bowlingDetails =
+    selectedPlayer && selectedPlayer.bowlingInnings > 0
+      ? [
+          { key: "", value: "Bowling Records", isHeader: true, size: 12 },
+          { key: "Innings", value: selectedPlayer.bowlingInnings, size: 12 },
+          { key: "Overs", value: selectedPlayer.overs, size: 12 },
+          { key: "Maiden Overs", value: selectedPlayer.maidens, size: 12 },
+
+          {
+            key: "Balls Bowled",
+            value: selectedPlayer.bowlingBalls,
+            size: 12,
+          },
+          {
+            key: "Dot Balls Bowled",
+            value: selectedPlayer.bowlingDotBalls,
+            size: 12,
+          },
+          { key: "Runs Conceded", value: selectedPlayer.bowlingRuns, size: 12 },
+          { key: "Wickets", value: selectedPlayer.wickets, size: 12 },
+          { key: "Average", value: calcBowAverage(selectedPlayer), size: 12 },
+          {
+            key: "Economy Rate",
+            value: calcEconRate(selectedPlayer),
+            size: 12,
+          },
+          {
+            key: "Best Bowling",
+            value: calcBestBowling(selectedPlayer),
+            size: 12,
+          },
+          { key: "Wide Balls", value: selectedPlayer.wides, size: 12 },
+          { key: "No Balls", value: selectedPlayer.noBalls, size: 12 },
+          {
+            key: "Sixes Conceded",
+            value: selectedPlayer.sixesConceded,
+            size: 12,
+          },
+          {
+            key: "Fours Conceded",
+            value: selectedPlayer.foursConceded,
+            size: 12,
+          },
+        ]
+      : [];
+
   const details = selectedPlayer
     ? [
         { key: "Matches", value: selectedPlayer.matches, size: 12 },
         { key: "", value: "Batting Records", isHeader: true, size: 12 },
-        { key: "Bat Innings", value: selectedPlayer.battingInnings, size: 12 },
+        { key: "Innings", value: selectedPlayer.battingInnings, size: 12 },
         { key: "Runs Scored", value: selectedPlayer.runs, size: 12 },
         {
           key: "Highest Score",
@@ -89,35 +176,14 @@ export default function PlayerStats() {
           }`,
           size: 12,
         },
+        { key: "Average", value: calcBatAverage(selectedPlayer), size: 12 },
+        { key: "Strike Rate", value: calcStrikeRate(selectedPlayer), size: 12 },
         { key: "Balls Faced", value: selectedPlayer.balls, size: 12 },
         { key: "Dot Balls", value: selectedPlayer.dotBalls, size: 12 },
         { key: "Fours", value: selectedPlayer.fours, size: 12 },
         { key: "Sixes", value: selectedPlayer.sixes, size: 12 },
         { key: "Catches", value: selectedPlayer.catches, size: 12 },
-        { key: "", value: "Bowling Records", isHeader: true, size: 12 },
-        { key: "Bow Innings", value: selectedPlayer.bowlingInnings, size: 12 },
-        { key: "Overs", value: selectedPlayer.overs, size: 12 },
-        { key: "Maiden Overs", value: selectedPlayer.maidens, size: 12 },
-
-        {
-          key: "Balls Bowled",
-          value: selectedPlayer.bowlingBalls,
-          size: 12,
-        },
-        {
-          key: "Dot Balls Bowled",
-          value: selectedPlayer.bowlingDotBalls,
-          size: 12,
-        },
-        { key: "Runs Conceded", value: selectedPlayer.bowlingRuns, size: 12 },
-        { key: "Wickets", value: selectedPlayer.wickets, size: 12 },
-        {
-          key: "Best Bowling",
-          value: `${selectedPlayer.bestBowlingWickets}/${selectedPlayer.bestBowlingRuns}`,
-          size: 12,
-        },
-        { key: "Wide Balls", value: selectedPlayer.wides, size: 12 },
-        { key: "No Balls", value: selectedPlayer.noBalls, size: 12 },
+        ...bowlingDetails,
       ]
     : [];
 

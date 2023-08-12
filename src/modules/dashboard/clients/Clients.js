@@ -1,7 +1,7 @@
 import * as React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import AppBar from "@mui/material/AppBar";
-import Button from "@mui/material/Button";
-import CameraIcon from "@mui/icons-material/PhotoCamera";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -9,38 +9,25 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid";
-import Stack from "@mui/material/Stack";
-import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Link from "@mui/material/Link";
 import IconButton from "@mui/material/IconButton";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center">
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
-
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+import * as genericActions from "../../../store/actions/dashboard";
+import ConfirmationDialog from "../../../components/confirmation-dialog/ConfirmationDialog";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
 export default function Clients() {
+  const [clientId, setClientId] = React.useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const {
     loginStatus: { success, fail },
     roles: { isSuperAdmin, isAdmin },
@@ -52,6 +39,11 @@ export default function Clients() {
   if (currentClient) {
     selectedClient = JSON.parse(currentClient);
   }
+
+  const handleDelete = () => {
+    dispatch(genericActions.deleteClient(clientId));
+    setClientId("");
+  };
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -67,45 +59,6 @@ export default function Clients() {
         </Toolbar>
       </AppBar>
       <main>
-        {/* Hero unit */}
-        {/* <Box
-          sx={{
-            bgcolor: "background.paper",
-            pt: 8,
-            pb: 6,
-          }}
-        >
-          <Container maxWidth="sm">
-            <Typography
-              component="h1"
-              variant="h2"
-              align="center"
-              color="text.primary"
-              gutterBottom
-            >
-              Album layout
-            </Typography>
-            <Typography
-              variant="h5"
-              align="center"
-              color="text.secondary"
-              paragraph
-            >
-              Something short and leading about the collection below—its
-              contents, the creator, etc. Make it short and sweet, but not too
-              short so folks don&apos;t simply skip over it entirely.
-            </Typography>
-            <Stack
-              sx={{ pt: 4 }}
-              direction="row"
-              spacing={2}
-              justifyContent="center"
-            >
-              <Button variant="contained">Main call to action</Button>
-              <Button variant="outlined">Secondary action</Button>
-            </Stack>
-          </Container>
-        </Box> */}
         <Container sx={{ py: 8 }} maxWidth="md">
           {/* End hero unit */}
           <Grid container spacing={4}>
@@ -145,8 +98,17 @@ export default function Clients() {
                     </Typography>
                     {isSuperAdmin && (
                       <Typography variant="caption">
+                        Phone: <strong>{client.phone}</strong>
+                        <br />
                         Admin pin: <strong>{client.pin}</strong> <br /> User
                         pin: <strong>{client.userPin}</strong>
+                        <br />
+                        Algolia Index: <strong>{client.algoliaIndex}</strong>
+                      </Typography>
+                    )}
+                    {isAdmin && !isSuperAdmin && (
+                      <Typography variant="caption">
+                        User pin: <strong>{client.userPin}</strong>
                       </Typography>
                     )}
                   </CardContent>
@@ -170,6 +132,14 @@ export default function Clients() {
                       >
                         <ExitToAppIcon />
                       </IconButton>
+                      <IconButton
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setClientId(client.id);
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
                     </CardActions>
                   )}
                 </Card>
@@ -178,22 +148,14 @@ export default function Clients() {
           </Grid>
         </Container>
       </main>
-      {/* Footer */}
-      {/* <Box sx={{ bgcolor: "background.paper", p: 6 }} component="footer">
-        <Typography variant="h6" align="center" gutterBottom>
-          Footer
-        </Typography>
-        <Typography
-          variant="subtitle1"
-          align="center"
-          color="text.secondary"
-          component="p"
-        >
-          Something here to give the footer a purpose!
-        </Typography>
-        <Copyright />
-      </Box> */}
-      {/* End footer */}
+      {clientId && (
+        <ConfirmationDialog
+          title={"Delete Client"}
+          actionBtnText={"Delete"}
+          handleClose={handleDelete}
+          confirmationText={"Do you really want to delete the client?"}
+        />
+      )}
     </ThemeProvider>
   );
 }

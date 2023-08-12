@@ -24,7 +24,7 @@ export default function PlayerDetails({
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1a-content"
           id="panel1a-header"
-          sx={{ backgroundColor: "cadetblue", color: "white" }}
+          sx={{ backgroundColor: "#8aa2a2", color: "white" }}
         >
           <Typography variant="h6">{player.name}</Typography>
         </AccordionSummary>

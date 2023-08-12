@@ -12,6 +12,7 @@ const initialState = {
     isUser: false,
   },
   clients: [],
+  clientRegistered: false,
 };
 
 const dashboardReducer = (state = initialState, action) => {
@@ -21,7 +22,11 @@ const dashboardReducer = (state = initialState, action) => {
         ...state,
         progressLoader: action.payload,
       };
-
+    case genericActions.CLEAR_REGISTER:
+      return {
+        ...state,
+        clientRegistered: false,
+      };
     case genericActions.VALIDATE_LOGIN: {
       return {
         ...state,
@@ -30,8 +35,8 @@ const dashboardReducer = (state = initialState, action) => {
       };
     }
     case genericActions.VALIDATE_LOGIN_SUCCESS: {
-      const { isSuperAdmin, data } = action.payload;
-      const isAdmin = data && data.length > 0 ? data[0].isAdmin : false;
+      const { isSuperAdmin, isAdmin, data } = action.payload;
+      // const isAdmin = data && data.length > 0 ? data[0].isAdmin : false;
       if (data && data.length > 0) {
         sessionStorage.setItem("userDetails", JSON.stringify(action.payload));
         if (!isSuperAdmin) {
@@ -55,9 +60,71 @@ const dashboardReducer = (state = initialState, action) => {
         loginStatus: {
           ...state.loginStatus,
           success: data && data.length > 0,
-          fail: !data || (data && data.length === 0),
+          fail:
+            !data || (data && data.length === 0)
+              ? "Invalid credentials. Please check with admin!"
+              : "",
         },
         clients: data,
+      };
+    }
+    case genericActions.VALIDATE_LOGIN_ERROR: {
+      return {
+        ...state,
+        progressLoader: false,
+        loginStatus: {
+          ...state.loginStatus,
+          fail: "Network Error... Please try again!",
+        },
+      };
+    }
+    case genericActions.REGISTER_CLIENT: {
+      return {
+        ...state,
+        progressLoader: true,
+      };
+    }
+    case genericActions.REGISTER_CLIENT_SUCCESS:
+      return {
+        ...state,
+        progressLoader: false,
+        clientRegistered: true,
+      };
+    case genericActions.REGISTER_CLIENT_ERROR: {
+      return {
+        ...state,
+        progressLoader: false,
+        clientRegistered: false,
+      };
+    }
+    case genericActions.DELETE_CLIENT: {
+      return {
+        ...state,
+        progressLoader: true,
+      };
+    }
+    case genericActions.DELETE_CLIENT_SUCCESS: {
+      const clients = [...state.clients].filter(
+        (cli) => cli.id !== action.payload
+      );
+      sessionStorage.setItem(
+        "userDetails",
+        JSON.stringify({
+          isAdmin: true,
+          isSuperAdmin: true,
+          data: clients,
+        })
+      );
+      return {
+        ...state,
+        progressLoader: false,
+        clients,
+      };
+    }
+    case genericActions.DELETE_CLIENT_ERROR: {
+      return {
+        ...state,
+        progressLoader: false,
       };
     }
     case genericActions.LOGOUT_ACTION:

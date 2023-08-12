@@ -56,6 +56,21 @@ export function* getPlayersByTeamSaga(action) {
   }
 }
 
+export function* getPlayersByClientSaga(action) {
+  try {
+    const res = yield axios.get(
+      `${API}/cricket/getAllPlayers/${action.payload}`
+    );
+    if (res.status === 200) {
+      yield put(cricketActions.getPlayersByClientSuccess(res.data));
+    }
+    yield put(genericActions.switchProgressLoader(false));
+  } catch (e) {
+    yield put(genericActions.switchProgressLoader(false));
+    // handle error
+  }
+}
+
 export function* createPlayerBeforeStartSaga(action) {
   try {
     const { apiData, actionData } = action.payload;
@@ -177,6 +192,10 @@ function* getCricketWatcher() {
   );
   yield takeEvery(cricketActions.ADD_CRICKET_PLAYER, addCricketPlayerSaga);
   yield takeLatest(cricketActions.GET_PLAYERS_BY_TEAM, getPlayersByTeamSaga);
+  yield takeLatest(
+    cricketActions.GET_PLAYERS_BY_CLIENT,
+    getPlayersByClientSaga
+  );
   yield takeLatest(cricketActions.SAVE_CRICKET_MATCH, updateMatchSaga);
   yield takeLatest(cricketActions.GET_MATCH_LIST, getCricketMatchesSaga);
   yield takeLatest(cricketActions.UPDATE_MATCH_PLAYERS, updateMatchPlayersSaga);

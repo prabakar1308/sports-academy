@@ -1,0 +1,11 @@
+.player-record-stats-wrapper {
+  .MuiTabs-flexContainer {
+    button {
+      width: 100%;
+    }
+  }
+
+  .Mui-disabled.MuiTabs-scrollButtons {
+    opacity: 0.2;
+  }
+}
