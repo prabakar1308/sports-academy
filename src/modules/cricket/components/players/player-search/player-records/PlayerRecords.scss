@@ -1,32 +1,43 @@
 .player-records-wrapper {
+  .header-text {
+    color: #1b5252;
+    width: 100%;
+    background: #d5eed6;
+    display: block;
+  }
   .MuiTable-root {
     td,
     th {
-      padding: 12px 6px;
+      padding: 6px 3px;
     }
 
     th {
-      border-bottom: 1px solid cadetblue;
+      // border-bottom: 1px solid cadetblue;
     }
 
     thead,
     tbody {
-      border: 1px solid cadetblue;
+      // border: 1px solid cadetblue;
     }
 
+    // .batting-section {
+    //   background-color: #8aa2a2;
+    //   color: white;
+    // }
+    .bowling-section,
     .batting-section {
-      // background-color: #ecf1d9;
-    }
-    .bowling-section {
-      // background-color: #d9e1dc;
+      background-color: #8aa2a2;
+      color: white;
+      text-align: center;
     }
     .margin-right-border {
-      border-right: 1px solid cadetblue;
+      // border-right: 1px solid cadetblue;
     }
     .date-section {
-      border-right: 1px solid cadetblue;
+      // border-right: 1px solid cadetblue;
       // background-color: #c9e4c3;
       font-weight: bold;
+      color: #7e8b8b;
     }
   }
 }

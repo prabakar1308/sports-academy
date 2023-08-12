@@ -2,10 +2,13 @@ import * as React from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
-import { createTheme, ThemeProvider, styled } from "@mui/material/styles";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { styled } from "@mui/material/styles";
+
 import AutoCompleteAsync from "../../autocomplete-async/AutoCompleteAsync";
 import "./PlayerStats.scss";
-import { Stack, Typography } from "@mui/material";
+import { calcBatAverage, calcBowAverage } from "../../../utils";
 
 const Item = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
@@ -76,15 +79,21 @@ export default function PlayerStats() {
     );
   };
 
-  const calcBowAverage = ({ wickets, bowlingRuns }) => {
-    if (wickets > 0 && bowlingRuns > 0) return bowlingRuns / wickets;
-    return "-";
-  };
+  // const calcBowAverage = ({ wickets, bowlingRuns }) => {
+  //   if (wickets > 0 && bowlingRuns > 0) {
+  //     const avg = bowlingRuns / wickets;
+  //     return Number.isInteger(avg) ? avg : parseFloat(avg).toFixed(2);
+  //   }
+  //   return "-";
+  // };
 
-  const calcBatAverage = ({ outs, runs }) => {
-    if (runs > 0 && outs > 0) return runs / outs;
-    return "-";
-  };
+  // const calcBatAverage = ({ outs, runs }) => {
+  //   if (runs > 0 && outs > 0) {
+  //     const avg = runs / outs;
+  //     return Number.isInteger(avg) ? avg : parseFloat(avg).toFixed(2);
+  //   }
+  //   return "-";
+  // };
 
   const calcBestBowling = ({ bestBowlingWickets, bestBowlingRuns }) => {
     if (bestBowlingWickets > 0)

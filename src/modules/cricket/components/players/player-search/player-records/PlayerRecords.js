@@ -65,7 +65,12 @@ function preventDefault(event) {
 export default function PlayerRecords({ records }) {
   return (
     <div className="player-records-wrapper">
-      <Typography variant="h6" color="primary" gutterBottom>
+      <Typography
+        className="header-text"
+        variant="button"
+        color="primary"
+        gutterBottom
+      >
         Recent Matches
       </Typography>
       <Table size="medium">

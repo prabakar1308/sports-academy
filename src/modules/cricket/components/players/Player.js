@@ -1,10 +1,14 @@
 import * as React from "react";
-import CircularProgress from "@mui/material/CircularProgress";
+import { useDispatch } from "react-redux";
 import Box from "@mui/material/Box";
 import PlayerSearch from "./player-search/PlayerSearch";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+
 import PlayerStats from "./player-stats/PlayerStats";
+import RecordStats from "./record-stats/RecordStats";
+import * as cricketActions from "../../../../store/actions/cricket";
+import * as genericActions from "../../../../store/actions/dashboard";
 import "./Player.scss";
 
 function CustomTabPanel(props) {
@@ -35,11 +39,18 @@ function a11yProps(index) {
 }
 
 export default function PlayersHome() {
+  const dispatch = useDispatch();
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  React.useEffect(() => {
+    const client = JSON.parse(sessionStorage.getItem("client"));
+    dispatch(genericActions.switchProgressLoader(true));
+    dispatch(cricketActions.getPlayersByClient(client ? client.clientId : 0));
+  }, []);
 
   return (
     // <Box
@@ -63,6 +74,7 @@ export default function PlayersHome() {
           aria-label="player tabs"
           textColor="secondary"
           indicatorColor="secondary"
+          className="tabs-container"
         >
           <Tab label="Stats" {...a11yProps(0)} />
           <Tab label="Match Wise" {...a11yProps(1)} />
@@ -76,7 +88,7 @@ export default function PlayersHome() {
         <PlayerSearch />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
-        Development - In Progress
+        <RecordStats />
       </CustomTabPanel>
     </div>
   );

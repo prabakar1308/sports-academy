@@ -104,6 +104,9 @@ const Cricket = () => {
     const client = sessionStorage.getItem("client");
     if (!client) {
       navigate("/");
+    } else {
+      const clientData = JSON.parse(client);
+      dispatch(cricketActions.getCricketTeams(clientData));
     }
     const unloadCallback = (event) => {
       event.preventDefault();
