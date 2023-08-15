@@ -8,6 +8,7 @@ import Grid from "@mui/material/Grid";
 import { WICKET_TYPES } from "../../../constants";
 import ExtrasDialog from "../extras-dialog/ExtrasDialog";
 import "./PlayerItems.scss";
+import { Avatar, Stack } from "@mui/material";
 
 export default function PlayerItems({
   isFirstInnings,
@@ -48,7 +49,25 @@ export default function PlayerItems({
         byes = byes + ball.runs;
       }
     });
-    return `${extras} (${wide} WD, ${noBall} NB, ${byes} B)`;
+    // return `${extras} (${wide} WD, ${noBall} NB, ${byes} B)`;
+    return (
+      <Stack direction={"row"}>
+        <Avatar
+          sx={{
+            width: 18,
+            height: 18,
+            // marginTop: "-1px",
+            marginRight: "4px",
+            fontSize: "0.75rem",
+            color: "black",
+            backgroundColor: "#f7f4f4",
+          }}
+        >
+          {extras}
+        </Avatar>
+        <Typography>{`(${wide} WD, ${noBall} NB, ${byes} B)`}</Typography>
+      </Stack>
+    );
   };
 
   const batsmenHeaders = [
@@ -199,9 +218,13 @@ export default function PlayerItems({
     );
   };
 
-  const getBowlerListItem = (player, index) => {
+  const getBowlerListItem = (player, index, isCurrentBowler) => {
     return player ? (
-      <ListItem divider key={index}>
+      <ListItem
+        divider
+        key={index}
+        sx={{ backgroundColor: isCurrentBowler ? "#eef5f2" : "white" }}
+      >
         <Grid container spacing={1}>
           <Grid item xs={6}>
             <ListItemText className="player-name" primary={player.name} />
@@ -313,10 +336,16 @@ export default function PlayerItems({
         {bowlers.map((bowler, index) => {
           const bow =
             bowler.id === currentBowler.id ? currentBowler : { ...bowler };
-          return getBowlerListItem(bow, index);
+          return getBowlerListItem(bow, index, bowler.id === currentBowler.id);
         })}
-        {!currentBowlerExists && getBowlerListItem(currentBowler, 123)}
-        <ListItem sx={{ backgroundColor: "#e6f8e2", borderRadius: "4px" }}>
+        {!currentBowlerExists && getBowlerListItem(currentBowler, 123, true)}
+        <ListItem
+          sx={{
+            backgroundColor: "#719387",
+            color: "white",
+            borderRadius: "4px",
+          }}
+        >
           <Grid
             container
             spacing={1}
@@ -330,7 +359,7 @@ export default function PlayerItems({
                   setShowExtras({ balls, team, currentBowler, bowlers })
                 }
               >
-                <ListItemText primary={`${getExtras()}`} />
+                <ListItemText primary={getExtras()} />
               </a>
             </Grid>
             <Grid item xs={3}>

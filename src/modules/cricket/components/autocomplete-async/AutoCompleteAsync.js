@@ -118,16 +118,16 @@ export default function AutoCompleteAsync({
       onChange={(event, newValue) => {
         if (typeof newValue === "string") {
           handleChange({
-            title: newValue,
+            title: newValue.trim(),
             id: "",
-            name: newValue,
+            name: newValue.trim(),
           });
         } else if (newValue && newValue.inputValue) {
           // Create a new value from the user input
           handleChange({
-            title: newValue.inputValue,
+            title: newValue.inputValue.trim(),
             id: "",
-            name: newValue.inputValue,
+            name: newValue.inputValue.trim(),
           });
         } else {
           handleChange(newValue);

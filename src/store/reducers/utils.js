@@ -340,11 +340,12 @@ export const updateTeamPlayerScore = (scoreboard, matchDetails) => {
 // };
 
 // generate this to store in algolia (individual match record)
-export const getCurrentMatchScoreDetails = (players, bowlers) => {
+export const getCurrentMatchScoreDetails = (players, bowlers, team1, team2) => {
   return players.map((player) => {
     const filteredBowler = bowlers.filter((bow) => bow.id === player.id);
     return {
       teamId: player.teamId,
+      oppTeamId: player.teamId === team1.id ? team2.id : team1.id,
       id: player.id,
       name: player.name,
       battingInnings: player.isOut === null ? 0 : 1,

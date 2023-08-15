@@ -74,6 +74,7 @@ export default function BatsmenCard() {
         alignItems={"start"}
         sx={{
           backgroundColor: isHeader ? "lightseagreen" : "#f3f9e0",
+          color: isHeader ? "white" : "black",
           borderRadius: "4px",
         }}
       >

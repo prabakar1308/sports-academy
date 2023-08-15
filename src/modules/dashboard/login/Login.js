@@ -13,6 +13,8 @@ import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 import * as genericActions from "../../../store/actions/dashboard";
+import { IconButton } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 function Copyright(props) {
   return (
@@ -37,6 +39,7 @@ export default function LoginPage({ handleLogin }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [pin, setPin] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
   const [phone, setPhone] = React.useState("");
   const [disableBtn, setDisableBtn] = React.useState(false);
   const {
@@ -62,6 +65,14 @@ export default function LoginPage({ handleLogin }) {
   //     dispatch(genericActions.validateLoginSuccess(JSON.parse(userDetails)));
   //   }
   // }, []);
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -137,7 +148,7 @@ export default function LoginPage({ handleLogin }) {
               />
               <TextField
                 value={pin}
-                type="number"
+                type={showPassword ? "text" : "password"}
                 margin="normal"
                 required
                 fullWidth
@@ -151,6 +162,16 @@ export default function LoginPage({ handleLogin }) {
                   setPin(event.target.value);
                   if (event.target.value.trim().length > 0)
                     setDisableBtn(false);
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <IconButton
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                    >
+                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  ),
                 }}
               />
               <Button

@@ -712,7 +712,9 @@ const cricketReducer = (state = initialState, action) => {
       let players = [...secondInnings.players];
       let bowlers = [...secondInnings.bowlers];
       // batsmen1
-      const batsmen1Exists = players.findIndex((bat) => bat.id === batsmen1.id);
+      const batsmen1Exists = players.findIndex(
+        (bat) => batsmen1 && bat.id === batsmen1.id
+      );
       if (batsmen1Exists >= 0) {
         const battingOrder = players[batsmen1Exists].battingOrder;
         const catches = players[batsmen1Exists].catches;
@@ -722,7 +724,7 @@ const cricketReducer = (state = initialState, action) => {
           battingOrder,
           catches,
         });
-      } else {
+      } else if (batsmen1) {
         players.push({
           ...batsmen1,
           isOut: false,
@@ -730,17 +732,19 @@ const cricketReducer = (state = initialState, action) => {
         });
       }
       // batsmen 2
-      const batsmen2Exists = players.findIndex((bat) => bat.id === batsmen2.id);
+      const batsmen2Exists = players.findIndex(
+        (bat) => batsmen2 && bat.id === batsmen2.id
+      );
       if (batsmen2Exists >= 0) {
         const battingOrder = players[batsmen2Exists].battingOrder;
-        const catches = players[batsmen1Exists].catches;
+        const catches = players[batsmen2Exists].catches;
         players.splice(batsmen2Exists, 1, {
           ...batsmen2,
           isOut: false,
           battingOrder,
           catches,
         });
-      } else {
+      } else if (batsmen2) {
         players.push({
           ...batsmen2,
           isOut: false,
@@ -787,7 +791,9 @@ const cricketReducer = (state = initialState, action) => {
 
       const currentMatchPlayers = getCurrentMatchScoreDetails(
         [...firstInnings.players, ...players],
-        [...firstInnings.bowlers, ...bowlers]
+        [...firstInnings.bowlers, ...bowlers],
+        firstInnings.team,
+        secondInnings.team
       );
 
       return {

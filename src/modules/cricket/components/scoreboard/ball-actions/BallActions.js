@@ -313,6 +313,11 @@ export default function BallActions({ overDetails }) {
     } else {
       dispatch(cricketActions.undoScoreboard());
       setBatsmenDialog(false);
+      setOpenDialog(false);
+      setEndDialog(false);
+      setOpenNewInningsDialog(false);
+      setRunout(false);
+      setEndMatchConfirm(false);
     }
   };
 
@@ -381,7 +386,8 @@ export default function BallActions({ overDetails }) {
       // isFirstInnings ? setOpenNewInningsDialog(true) : setEndDialog(true);
       isFirstInnings ? setOpenNewInningsDialog(true) : setEndMatchConfirm(true);
     } else if (!isFirstInnings && currInnTotalRuns > firstInnings.totalRuns) {
-      setEndDialog(true);
+      // setEndDialog(true);
+      setEndMatchConfirm(true);
     } else {
       if (overLastBall) {
         setOpenDialog(true);
@@ -685,7 +691,9 @@ export default function BallActions({ overDetails }) {
           isBatsmenRetire={isBatsmenRetire}
           // + 2 - (current wicket + not out batsmen)
           hideNewBatsmen={
-            playersPerTeam === wickets + 1 || openNewInningsDialog || endDialog
+            playersPerTeam === wickets + 1 ||
+            openNewInningsDialog ||
+            endMatchConfirm
           }
         />
       )}
@@ -728,7 +736,7 @@ export default function BallActions({ overDetails }) {
           }
         />
       )} */}
-      {endMatchConfirm && (
+      {endMatchConfirm && !batsmenDialog && (
         <ConfirmationDialog
           title={"Close Match"}
           actionBtnText={"Continue"}
