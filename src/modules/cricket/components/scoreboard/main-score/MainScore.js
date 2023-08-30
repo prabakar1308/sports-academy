@@ -6,6 +6,7 @@ import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import ScoreboardIcon from "@mui/icons-material/Scoreboard";
+import SaveIcon from "@mui/icons-material/Save";
 import BlockIcon from "@mui/icons-material/Block";
 import StartIcon from "@mui/icons-material/Start";
 // import {
@@ -18,6 +19,7 @@ import StartIcon from "@mui/icons-material/Start";
 
 // import { db } from "../../../../../database/firebase.db";
 import * as cricketActions from "../../../../../store/actions/cricket";
+import * as genericActions from "../../../../../store/actions/dashboard";
 import NewInningsDialog from "../new-innings-dialog/NewInningsDialog";
 import AvatarIcon from "../../../../../components/avatar-icon/AvatarIcon";
 import EndMatchDialog from "../end-match-dialog/EndMatchDialog";
@@ -30,8 +32,11 @@ import "./MainScore.scss";
 
 export default function MainScore() {
   const {
+    matchDetails,
+    scoreboard,
     matchDetails: { overs, playersPerTeam },
     scoreboard: { isFirstInnings, firstInnings, secondInnings },
+    scoreboardEntries,
   } = useSelector((state) => state.cricket);
 
   const navigate = useNavigate();
@@ -152,13 +157,28 @@ export default function MainScore() {
           </Typography>
         </CardContent>
         <CardActions sx={{ justifyContent: "center" }}>
-          {batsmen1 && (
+          {/* {batsmen1 && (
             <AvatarIcon
               icon={<ScoreboardIcon />}
               handleClick={() => navigate("/cricket/finalscore")}
               tooltip="Detailed Scoreboard"
             />
-          )}
+          )} */}
+          <AvatarIcon
+            icon={<SaveIcon />}
+            handleClick={() => {
+              dispatch(genericActions.switchProgressLoader(true));
+              dispatch(
+                cricketActions.saveCricketMatch({
+                  scoreboard,
+                  matchDetails,
+                  saveAction: true,
+                })
+              );
+            }}
+            disabled={!(scoreboardEntries.length > 1)}
+            tooltip="Save Scoreboard"
+          />
           {(!batsmen1 || isFirstInnings) && (
             <AvatarIcon
               icon={<StartIcon />}

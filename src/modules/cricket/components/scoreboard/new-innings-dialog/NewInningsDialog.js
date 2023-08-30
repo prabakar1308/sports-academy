@@ -55,7 +55,7 @@ export default function NewInningsDialog(props) {
     <Dialog open={open}>
       {/* <DialogTitle>{title}</DialogTitle> */}
 
-      <div className="player-dialog-wrapper">
+      <div className="new-inning-dialog-wrapper">
         {stopInnings && (
           <Alert severity="warning">
             {remainingOvers} overs remaining in this innings!

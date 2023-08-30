@@ -59,7 +59,9 @@ export default function BatsmenCard() {
   bowlerKeys.forEach((key) => {
     if (key === "overs") {
       bowlerItems.push(
-        `${currentBowler[key]}.${currentBowler.bowlingBalls % 6}`
+        `${parseInt(currentBowler.bowlingBalls / 6)}.${
+          currentBowler.bowlingBalls % 6
+        }`
       );
     } else bowlerItems.push(currentBowler[key] || 0);
   });

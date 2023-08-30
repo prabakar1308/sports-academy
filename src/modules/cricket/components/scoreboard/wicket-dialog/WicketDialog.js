@@ -68,7 +68,7 @@ export default function WicketDialog(props) {
     <Dialog onClose={() => handleClose(null)} open={open}>
       {/* <DialogTitle>{title}</DialogTitle> */}
 
-      <div className="player-dialog-wrapper">
+      <div className="wicket-dialog-wrapper">
         {!isBatsmenRetire && (
           <div className="wicket-type">
             <Typography variant="subtitle2" gutterBottom>

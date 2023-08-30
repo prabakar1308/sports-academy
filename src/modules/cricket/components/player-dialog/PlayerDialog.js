@@ -9,13 +9,13 @@ import Dialog from "@mui/material/Dialog";
 // import AddIcon from "@mui/icons-material/Add";
 // import Stack from "@mui/material/Stack";
 // import TextField from "@mui/material/TextField";
-// import Button from "@mui/material/Button";
+import Button from "@mui/material/Button";
 // import { Timestamp } from "firebase/firestore/lite";
 // import { v4 as uuid } from "uuid";
 
 import "./PlayerDialog.scss";
 import { getNewPlayerDetails, omitProps } from "../../utils";
-import AutocompleteDropdown from "../../../../components/autocomplete-dropdown/AutocompleteDropdown";
+// import AutocompleteDropdown from "../../../../components/autocomplete-dropdown/AutocompleteDropdown";
 import AutoCompleteAsync from "../autocomplete-async/AutoCompleteAsync";
 
 export default function PlayerDialog(props) {
@@ -129,6 +129,14 @@ export default function PlayerDialog(props) {
           width={250}
           excludedItems={excludedPlayers}
         />
+        <Button
+          sx={{ width: "100%" }}
+          variant="outlined"
+          onClick={() => onClose({})}
+          className="update-button"
+        >
+          Cancel
+        </Button>
         {/* </div> */}
         {/* </Box> */}
 

@@ -10,6 +10,7 @@ import Grid from "@mui/material/Grid";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
+import ChangeCircleIcon from "@mui/icons-material/ChangeCircle";
 // import {
 //   setDoc,
 //   doc,
@@ -58,6 +59,7 @@ export default function BallActions({ overDetails }) {
   const [byes, setByes] = React.useState(false);
   const [runout, setRunout] = React.useState(false);
   const [openDialog, setOpenDialog] = React.useState(false);
+  const [retireBowler, setRetireBowler] = React.useState(false);
   const [batsmenDialog, setBatsmenDialog] = React.useState(false);
   const [isBatsmenRetire, setIsBatsmenRetire] = React.useState(false);
   const [openNewInningsDialog, setOpenNewInningsDialog] = React.useState(false);
@@ -201,7 +203,6 @@ export default function BallActions({ overDetails }) {
       );
     }
     if (value) {
-      setOpenDialog(false);
       dispatch(
         cricketActions.updateCurrentBolwer({
           bowlerKey: isFirstInnings ? "firstInnings" : "secondInnings",
@@ -210,7 +211,12 @@ export default function BallActions({ overDetails }) {
           currentOver: over,
         })
       );
+    } else if (!retireBowler) {
+      // undo only for over change bowler cancel
+      dispatch(cricketActions.undoScoreboard());
     }
+    setOpenDialog(false);
+    setRetireBowler(false);
   };
 
   // addCtach added for newly created player to maintain catched count
@@ -634,7 +640,7 @@ export default function BallActions({ overDetails }) {
                   Undo
                 </Button>
 
-                <Button
+                {/* <Button
                   variant="contained"
                   color="secondary"
                   onClick={() => {
@@ -653,6 +659,14 @@ export default function BallActions({ overDetails }) {
                   sx={{ width: "150px" }}
                 >
                   Save
+                </Button> */}
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => setRetireBowler(true)}
+                  sx={{ width: "150px" }}
+                >
+                  Swap Bowler
                 </Button>
                 {/* <Button variant="contained" color="secondary">
                 Others
@@ -665,10 +679,10 @@ export default function BallActions({ overDetails }) {
         <Button size="small">Learn More</Button>
       </CardActions> */}
       </Card>
-      {openDialog && !batsmenDialog && (
+      {(openDialog || retireBowler) && !batsmenDialog && (
         <PlayerDialog
           team={bowlingInnings?.team}
-          open={openDialog}
+          open={openDialog || retireBowler}
           onClose={handleClose}
           title={"Select Bowler"}
           excludedPlayers={[currentBowler]}

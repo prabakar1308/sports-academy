@@ -245,10 +245,13 @@ const cricketReducer = (state = initialState, action) => {
 
       // console.log("isMaiden", isMaiden);
       // const maidenCount = isMaiden ? 1 : 0;
+
+      // TODO: needs to update logic when bowler retire
       const maidenCount = getMaidenCount(innings);
       const updatedCurrentBowler = {
         ...currentBowler,
-        overs: currentBowler.overs ? currentBowler.overs + 1 : 1,
+        // overs: currentBowler.overs ? currentBowler.overs + 1 : 1,
+        overs: parseInt(currentBowler.bowlingBalls / 6),
         maidens: currentBowler.maidens
           ? currentBowler.maidens + maidenCount
           : maidenCount,
